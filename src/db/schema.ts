@@ -16,7 +16,7 @@ export const crypto_trade_table = pgTable("crypto_trade", {
 	time: timestamp({ withTimezone: true }).notNull(),
 
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
-	updated_at: timestamp({ withTimezone: true }),
+	updated_at: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
 
 export const crypto_fiat_trade_table = pgTable("crypto_fiat_trade", {
@@ -32,18 +32,18 @@ export const crypto_fiat_trade_table = pgTable("crypto_fiat_trade", {
 	time: timestamp({ withTimezone: true }).notNull(),
 
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
-	updated_at: timestamp({ withTimezone: true }),
+	updated_at: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
 
 export const crypto_platform_fee_table = pgTable("crypto_platform_fee", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	uid: varchar({ length: 255 }).notNull(),
 	platform: crypto_trade_platform_enum().notNull(),
-	crypto_buy_fee_percentage: doublePrecision().default(0),
-	crypto_sell_fee_percentage: doublePrecision().default(0),
-	fiat_buy_fee_percentage: doublePrecision().default(0),
-	fiat_sell_fee_percentage: doublePrecision().default(0),
+	crypto_buy_fee_percentage: doublePrecision().notNull().default(0),
+	crypto_sell_fee_percentage: doublePrecision().notNull().default(0),
+	fiat_buy_fee_percentage: doublePrecision().notNull().default(0),
+	fiat_sell_fee_percentage: doublePrecision().notNull().default(0),
 
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
-	updated_at: timestamp({ withTimezone: true }),
+	updated_at: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

@@ -64,6 +64,20 @@
       "when": 1744826015677,
       "tag": "0008_updated_crypto_platform_fee_table",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1744830656284,
+      "tag": "0009_updated_updated_at_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1744830711333,
+      "tag": "0010_made_platform_fee_columns_not_null",
+      "breakpoints": true
     }
   ]
 }
