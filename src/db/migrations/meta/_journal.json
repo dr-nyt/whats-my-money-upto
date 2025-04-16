@@ -22,6 +22,20 @@
       "when": 1744748572916,
       "tag": "0002_added_platform_enum_and_created_at",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1744807814814,
+      "tag": "0003_add_uid_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1744808228868,
+      "tag": "0004_added_platform_fee_table",
+      "breakpoints": true
     }
   ]
 }

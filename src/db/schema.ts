@@ -5,6 +5,7 @@ export const crypto_trade_side_enum = pgEnum("crypto_trade_side", ["BUY", "SELL"
 
 export const crypto_trade_table = pgTable("crypto_trade", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	uid: varchar({ length: 255 }).notNull(),
 	pair_base: varchar({ length: 255 }).notNull(),												// USDT in BTC/USDT
 	pair_main: varchar({ length: 255 }).notNull(),												// BTC in BTC/USDT
 	side: crypto_trade_side_enum().notNull(),
@@ -17,6 +18,7 @@ export const crypto_trade_table = pgTable("crypto_trade", {
 
 export const crypto_trade_fee_table = pgTable("crypto_trade_fee", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	uid: varchar({ length: 255 }).notNull(),
 	trade_id: integer().references((): AnyPgColumn => crypto_trade_table.id).notNull(),
 	fees: jsonb().$type<{ name: string, amount: number }>().array().notNull(),
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -24,10 +26,21 @@ export const crypto_trade_fee_table = pgTable("crypto_trade_fee", {
 
 export const crypto_fiat_trade_table = pgTable("crypto_fiat_trade", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	uid: varchar({ length: 255 }).notNull(),
 	crypto_name: varchar({ length: 255 }).notNull(),
 	fiat_name: varchar({ length: 255 }).notNull(),
 	rate: doublePrecision().notNull(),
 	fee: doublePrecision().notNull(),
 	platform: crypto_trade_platform_enum().notNull(),
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
+export const user_crypto_platform_fee_table = pgTable("user_crypto_platform_fee", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	uid: varchar({ length: 255 }).notNull(),
+	platform: crypto_trade_platform_enum().notNull(),
+	crypto_buy_fee_percentage: doublePrecision().default(0),
+	crypto_sell_fee_percentage: doublePrecision().default(0),
+	fiat_buy_fee_percentage: doublePrecision().default(0),
+	fiat_sell_fee_percentage: doublePrecision().default(0),
 });
