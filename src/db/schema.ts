@@ -1,4 +1,4 @@
-import { AnyPgColumn, doublePrecision, integer, pgEnum, pgTable, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { doublePrecision, integer, pgEnum, pgTable, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
 
 export const crypto_trade_platform_enum = pgEnum("crypto_trade_platform", ["BINANCE"]);
 export const crypto_trade_side_enum = pgEnum("crypto_trade_side", ["BUY", "SELL"]);
@@ -11,17 +11,12 @@ export const crypto_trade_table = pgTable("crypto_trade", {
 	side: crypto_trade_side_enum().notNull(),
 	market_price: doublePrecision().notNull(),
 	amount: doublePrecision().notNull(),
-	fee_id: integer().references(() => crypto_trade_fee_table.id).notNull(),
-	platform: crypto_trade_platform_enum().notNull(),
-	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
-});
-
-export const crypto_trade_fee_table = pgTable("crypto_trade_fee", {
-	id: integer().primaryKey().generatedAlwaysAsIdentity(),
-	uid: varchar({ length: 255 }).notNull(),
-	trade_id: integer().references((): AnyPgColumn => crypto_trade_table.id).notNull(),
 	fees: jsonb().$type<{ name: string, amount: number }>().array().notNull(),
+	platform: crypto_trade_platform_enum().notNull(),
+	time: timestamp({ withTimezone: true }).notNull(),
+
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+	updated_at: timestamp({ withTimezone: true }),
 });
 
 export const crypto_fiat_trade_table = pgTable("crypto_fiat_trade", {
@@ -30,12 +25,17 @@ export const crypto_fiat_trade_table = pgTable("crypto_fiat_trade", {
 	crypto_name: varchar({ length: 255 }).notNull(),
 	fiat_name: varchar({ length: 255 }).notNull(),
 	rate: doublePrecision().notNull(),
-	fee: doublePrecision().notNull(),
+	amount: doublePrecision().notNull(),
+	side: crypto_trade_side_enum().notNull(),
+	fees: jsonb().$type<{ name: string, amount: number }>().array().notNull(),
 	platform: crypto_trade_platform_enum().notNull(),
+	time: timestamp({ withTimezone: true }).notNull(),
+
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+	updated_at: timestamp({ withTimezone: true }),
 });
 
-export const user_crypto_platform_fee_table = pgTable("user_crypto_platform_fee", {
+export const crypto_platform_fee_table = pgTable("crypto_platform_fee", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	uid: varchar({ length: 255 }).notNull(),
 	platform: crypto_trade_platform_enum().notNull(),
@@ -43,4 +43,7 @@ export const user_crypto_platform_fee_table = pgTable("user_crypto_platform_fee"
 	crypto_sell_fee_percentage: doublePrecision().default(0),
 	fiat_buy_fee_percentage: doublePrecision().default(0),
 	fiat_sell_fee_percentage: doublePrecision().default(0),
+
+	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+	updated_at: timestamp({ withTimezone: true }),
 });

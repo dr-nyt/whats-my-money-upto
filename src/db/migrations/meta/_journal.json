@@ -36,6 +36,34 @@
       "when": 1744808228868,
       "tag": "0004_added_platform_fee_table",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1744825817974,
+      "tag": "0005_updated_crypto_trade_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1744825853594,
+      "tag": "0006_removed_crypto_trade_fee_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1744825891821,
+      "tag": "0007_updated_crypto_fiat_trade_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1744826015677,
+      "tag": "0008_updated_crypto_platform_fee_table",
+      "breakpoints": true
     }
   ]
 }
