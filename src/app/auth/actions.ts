@@ -140,7 +140,7 @@ export async function resetPassword(state: AuthFormState, formData: FormData): P
 	}
 
 	const { error } = await supabase.auth.resetPasswordForEmail(validatedFields.data.email, {
-		redirectTo: `${process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL : 'http://localhost:3000'}/auth/update-password`,
+		redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/update-password`,
 	});
 
 	if (error) {
