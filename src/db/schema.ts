@@ -1,4 +1,5 @@
 import { doublePrecision, integer, pgEnum, pgTable, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema } from 'drizzle-zod';
 
 export const crypto_trade_platform_enum = pgEnum("crypto_trade_platform", ["BINANCE"]);
 export const crypto_trade_side_enum = pgEnum("crypto_trade_side", ["BUY", "SELL"]);
@@ -18,6 +19,8 @@ export const crypto_trade_table = pgTable("crypto_trade", {
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 	updated_at: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
+export type CryptoTradeT = typeof crypto_trade_table.$inferSelect;
+export type CryptoTradeInsertT = Omit<typeof crypto_trade_table.$inferInsert, "created_at" | "updated_at">;
 
 export const crypto_fiat_trade_table = pgTable("crypto_fiat_trade", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -34,6 +37,8 @@ export const crypto_fiat_trade_table = pgTable("crypto_fiat_trade", {
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 	updated_at: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
+export type CryptoFiatTradeT = typeof crypto_fiat_trade_table.$inferSelect;
+export type CryptoFiatTradeInsertT = Omit<typeof crypto_fiat_trade_table.$inferInsert, "created_at" | "updated_at">;
 
 export const crypto_platform_fee_table = pgTable("crypto_platform_fee", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -47,3 +52,5 @@ export const crypto_platform_fee_table = pgTable("crypto_platform_fee", {
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 	updated_at: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
+export type CryptoPlatformFeeT = typeof crypto_platform_fee_table.$inferSelect;
+export type CryptoPlatformFeeInsertT = Omit<typeof crypto_platform_fee_table.$inferInsert, "created_at" | "updated_at">;

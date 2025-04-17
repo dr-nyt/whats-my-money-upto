@@ -1,13 +1,19 @@
 "use server";
 import { and, eq } from "drizzle-orm";
 import { db } from "../client";
-import { crypto_platform_fee_table } from "../schema";
+import { crypto_platform_fee_table, CryptoPlatformFeeInsertT, CryptoPlatformFeeT } from "../schema";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
+import { User } from "@supabase/supabase-js";
+import { getUser } from "@/lib/supabase/server";
 
-export type CryptoPlatformFeeTableT = typeof crypto_platform_fee_table.$inferSelect;
-export type CryptoPlatformFeeTableInsertT = typeof crypto_platform_fee_table.$inferInsert;
+export const createCryptoPlatformFee = async (data: CryptoPlatformFeeInsertT) => {
+	const user = await getUser();
+	if (!user) return null;
 
-export const createCryptoPlatformFee = async (fee: CryptoPlatformFeeTableInsertT) => {
-	const res = await db.insert(crypto_platform_fee_table).values(fee).returning().execute();
+	const validatedData = validateInsert(user, data);
+	if (!validatedData) return null;
+
+	const res = await db.insert(crypto_platform_fee_table).values(validatedData).returning().execute();
 	if (res.length === 0) {
 		return null;
 	}
@@ -30,7 +36,7 @@ export const getAllCryptoPlatformFees = async (uid: string) => {
 	return res;
 }
 
-export const updateCryptoPlatformFee = async (id: number, uid: string, fee: Partial<CryptoPlatformFeeTableInsertT>) => {
+export const updateCryptoPlatformFee = async (id: number, uid: string, fee: Partial<CryptoPlatformFeeInsertT>) => {
 	const res = await db.update(crypto_platform_fee_table).set(fee).where(and(
 		eq(crypto_platform_fee_table.id, id),
 		eq(crypto_platform_fee_table.uid, uid)
@@ -55,4 +61,38 @@ export const deleteCryptoPlatformFee = async (id: number, uid: string) => {
 export const deleteAllCryptoPlatformFees = async (uid: string) => {
 	const res = await db.delete(crypto_platform_fee_table).where(eq(crypto_platform_fee_table.uid, uid)).returning().execute();
 	return res;
+}
+
+const selectSchema = createSelectSchema(crypto_platform_fee_table);
+const insertSchema = createInsertSchema(crypto_platform_fee_table);
+const updateSchema = createUpdateSchema(crypto_platform_fee_table);
+
+const validateSelect = (user: User, data: CryptoPlatformFeeT) => {
+	const validatedData = selectSchema.safeParse(data);
+	if (!validatedData.success) {
+		console.error("Invalid trade data", validatedData.error.format());
+		return null;
+	}
+	validatedData.data.uid = user.id;
+	return validatedData.data;
+}
+
+const validateInsert = (user: User, data: CryptoPlatformFeeInsertT) => {
+	const validatedData = insertSchema.safeParse(data);
+	if (!validatedData.success) {
+		console.error("Invalid trade data", validatedData.error.format());
+		return null;
+	}
+	validatedData.data.uid = user.id;
+	return validatedData.data;
+}
+
+const validateUpdate = (user: User, data: Partial<CryptoPlatformFeeInsertT>) => {
+	const validatedData = updateSchema.safeParse(data);
+	if (!validatedData.success) {
+		console.error("Invalid trade data", validatedData.error.format());
+		return null;
+	}
+	validatedData.data.uid = user.id;
+	return validatedData.data;
 }
