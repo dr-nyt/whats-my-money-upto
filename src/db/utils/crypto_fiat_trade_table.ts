@@ -4,11 +4,11 @@ import { db } from "../client";
 import { crypto_fiat_trade_table, CryptoFiatTradeInsertT, CryptoFiatTradeT } from "../schema";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { User } from "@supabase/supabase-js";
-import { getUser } from "@/lib/supabase/server";
+import { sGetUser } from "@/lib/supabase/server";
 import { validateData, validateId } from "./validator";
 
 export const createCryptoFiatTrade = async (data: CryptoFiatTradeInsertT) => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedData = validateInsert(user, data);
@@ -22,7 +22,7 @@ export const createCryptoFiatTrade = async (data: CryptoFiatTradeInsertT) => {
 }
 
 export const getCryptoFiatTrade = async (id: number) => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
@@ -39,7 +39,7 @@ export const getCryptoFiatTrade = async (id: number) => {
 }
 
 export const getAllCryptoFiatTrades = async () => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const res = await db.select().from(crypto_fiat_trade_table).where(eq(crypto_fiat_trade_table.uid, user.id)).execute();
@@ -47,7 +47,7 @@ export const getAllCryptoFiatTrades = async () => {
 }
 
 export const updateCryptoFiatTrade = async (id: number, data: Partial<CryptoFiatTradeInsertT>) => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
@@ -67,7 +67,7 @@ export const updateCryptoFiatTrade = async (id: number, data: Partial<CryptoFiat
 }
 
 export const deleteCryptoFiatTrade = async (id: number) => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
@@ -84,7 +84,7 @@ export const deleteCryptoFiatTrade = async (id: number) => {
 }
 
 export const deleteAllCryptoFiatTrades = async () => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const res = await db.delete(crypto_fiat_trade_table).where(eq(crypto_fiat_trade_table.uid, user.id)).returning().execute();

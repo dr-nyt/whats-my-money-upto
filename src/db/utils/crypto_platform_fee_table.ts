@@ -4,11 +4,11 @@ import { db } from "../client";
 import { crypto_platform_fee_table, CryptoPlatformFeeInsertT, CryptoPlatformFeeT } from "../schema";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { User } from "@supabase/supabase-js";
-import { getUser } from "@/lib/supabase/server";
+import { sGetUser } from "@/lib/supabase/server";
 import { validateData, validateId } from "./validator";
 
 export const createCryptoPlatformFee = async (data: CryptoPlatformFeeInsertT) => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedData = validateInsert(user, data);
@@ -22,7 +22,7 @@ export const createCryptoPlatformFee = async (data: CryptoPlatformFeeInsertT) =>
 }
 
 export const getCryptoPlatformFee = async (id: number) => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
@@ -39,7 +39,7 @@ export const getCryptoPlatformFee = async (id: number) => {
 }
 
 export const getAllCryptoPlatformFees = async () => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const res = await db.select().from(crypto_platform_fee_table).where(eq(crypto_platform_fee_table.uid, user.id)).execute();
@@ -47,7 +47,7 @@ export const getAllCryptoPlatformFees = async () => {
 }
 
 export const updateCryptoPlatformFee = async (id: number, data: Partial<CryptoPlatformFeeInsertT>) => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
@@ -67,7 +67,7 @@ export const updateCryptoPlatformFee = async (id: number, data: Partial<CryptoPl
 }
 
 export const deleteCryptoPlatformFee = async (id: number) => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
@@ -84,7 +84,7 @@ export const deleteCryptoPlatformFee = async (id: number) => {
 }
 
 export const deleteAllCryptoPlatformFees = async () => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const res = await db.delete(crypto_platform_fee_table).where(eq(crypto_platform_fee_table.uid, user.id)).returning().execute();

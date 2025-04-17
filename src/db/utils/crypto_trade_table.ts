@@ -2,13 +2,13 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../client";
 import { crypto_trade_table, CryptoTradeInsertT, CryptoTradeT } from "../schema";
-import { getUser } from "@/lib/supabase/server";
+import { sGetUser } from "@/lib/supabase/server";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { User } from "@supabase/supabase-js";
 import { validateData, validateId } from "./validator";
 
 export const createCryptoTrade = async (data: CryptoTradeInsertT): Promise<CryptoTradeT | null> => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedData = validateInsert(user, data);
@@ -22,7 +22,7 @@ export const createCryptoTrade = async (data: CryptoTradeInsertT): Promise<Crypt
 }
 
 export const getCryptoTrade = async (id: number): Promise<CryptoTradeT | null> => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
@@ -39,7 +39,7 @@ export const getCryptoTrade = async (id: number): Promise<CryptoTradeT | null> =
 }
 
 export const getAllCryptoTrades = async (): Promise<CryptoTradeT[] | null> => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const res = await db.select().from(crypto_trade_table).where(eq(crypto_trade_table.uid, user.id)).execute();
@@ -47,7 +47,7 @@ export const getAllCryptoTrades = async (): Promise<CryptoTradeT[] | null> => {
 }
 
 export const updateCryptoTrade = async (id: number, data: Partial<CryptoTradeInsertT>): Promise<CryptoTradeT | null> => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
@@ -67,7 +67,7 @@ export const updateCryptoTrade = async (id: number, data: Partial<CryptoTradeIns
 }
 
 export const deleteCryptoTrade = async (id: number): Promise<CryptoTradeT | null> => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
@@ -84,7 +84,7 @@ export const deleteCryptoTrade = async (id: number): Promise<CryptoTradeT | null
 }
 
 export const deleteAllCryptoTrades = async (): Promise<CryptoTradeT[] | null> => {
-	const user = await getUser();
+	const user = await sGetUser();
 	if (!user) return null;
 
 	const res = await db.delete(crypto_trade_table).where(eq(crypto_trade_table.uid, user.id)).returning().execute();
