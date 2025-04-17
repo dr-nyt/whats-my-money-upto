@@ -5,16 +5,16 @@ import { crypto_trade_table, CryptoTradeInsertT, CryptoTradeT } from "../schema"
 import { getUser } from "@/lib/supabase/server";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { User } from "@supabase/supabase-js";
-import { validateId } from "./validator";
+import { validateData, validateId } from "./validator";
 
-export const createCryptoTrade = async (trade: CryptoTradeInsertT): Promise<CryptoTradeT | null> => {
+export const createCryptoTrade = async (data: CryptoTradeInsertT): Promise<CryptoTradeT | null> => {
 	const user = await getUser();
 	if (!user) return null;
 
-	const validatedTradeData = validateInsert(user, trade);
-	if (!validatedTradeData) return null;
+	const validatedData = validateInsert(user, data);
+	if (!validatedData) return null;
 
-	const res = await db.insert(crypto_trade_table).values(validatedTradeData).returning().execute();
+	const res = await db.insert(crypto_trade_table).values(validatedData).returning().execute();
 	if (res.length === 0) {
 		return null;
 	}
@@ -46,17 +46,17 @@ export const getAllCryptoTrades = async (): Promise<CryptoTradeT[] | null> => {
 	return res;
 }
 
-export const updateCryptoTrade = async (id: number, trade: Partial<CryptoTradeInsertT>): Promise<CryptoTradeT | null> => {
+export const updateCryptoTrade = async (id: number, data: Partial<CryptoTradeInsertT>): Promise<CryptoTradeT | null> => {
 	const user = await getUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
 	if (!validatedId) return null;
 
-	const validatedTradeData = validateUpdate(user, trade);
-	if (!validatedTradeData) return null;
+	const validatedData = validateUpdate(user, data);
+	if (!validatedData) return null;
 
-	const res = await db.update(crypto_trade_table).set(validatedTradeData).where(and(
+	const res = await db.update(crypto_trade_table).set(validatedData).where(and(
 		eq(crypto_trade_table.id, validatedId),
 		eq(crypto_trade_table.uid, user.id)
 	)).returning().execute();
@@ -96,31 +96,14 @@ const insertSchema = createInsertSchema(crypto_trade_table);
 const updateSchema = createUpdateSchema(crypto_trade_table);
 
 const validateSelect = (user: User, data: CryptoTradeT) => {
-	const validatedData = selectSchema.safeParse(data);
-	if (!validatedData.success) {
-		console.error("Invalid trade data", validatedData.error.format());
-		return null;
-	}
-	validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validateData<CryptoTradeT, typeof selectSchema>(user, data, selectSchema);
 }
 
 const validateInsert = (user: User, data: CryptoTradeInsertT) => {
-	const validatedData = insertSchema.safeParse(data);
-	if (!validatedData.success) {
-		console.error("Invalid trade data", validatedData.error.format());
-		return null;
-	}
-	validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validateData<CryptoTradeInsertT, typeof insertSchema>(user, data, insertSchema);
 }
 
 const validateUpdate = (user: User, data: Partial<CryptoTradeInsertT>) => {
-	const validatedData = updateSchema.safeParse(data);
-	if (!validatedData.success) {
-		console.error("Invalid trade data", validatedData.error.format());
-		return null;
-	}
-	validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validateData<Partial<CryptoTradeInsertT>, typeof updateSchema>(user, data, updateSchema);
 }
+

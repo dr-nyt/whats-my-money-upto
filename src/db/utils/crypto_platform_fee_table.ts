@@ -5,6 +5,7 @@ import { crypto_platform_fee_table, CryptoPlatformFeeInsertT, CryptoPlatformFeeT
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { User } from "@supabase/supabase-js";
 import { getUser } from "@/lib/supabase/server";
+import { validateData, validateId } from "./validator";
 
 export const createCryptoPlatformFee = async (data: CryptoPlatformFeeInsertT) => {
 	const user = await getUser();
@@ -20,10 +21,16 @@ export const createCryptoPlatformFee = async (data: CryptoPlatformFeeInsertT) =>
 	return res[0];
 }
 
-export const getCryptoPlatformFee = async (id: number, uid: string) => {
+export const getCryptoPlatformFee = async (id: number) => {
+	const user = await getUser();
+	if (!user) return null;
+
+	const validatedId = validateId(id);
+	if (!validatedId) return null;
+
 	const res = await db.select().from(crypto_platform_fee_table).where(and(
-		eq(crypto_platform_fee_table.id, id),
-		eq(crypto_platform_fee_table.uid, uid)
+		eq(crypto_platform_fee_table.id, validatedId),
+		eq(crypto_platform_fee_table.uid, user.id)
 	)).execute();
 	if (res.length === 0) {
 		return null;
@@ -31,15 +38,27 @@ export const getCryptoPlatformFee = async (id: number, uid: string) => {
 	return res[0];
 }
 
-export const getAllCryptoPlatformFees = async (uid: string) => {
-	const res = await db.select().from(crypto_platform_fee_table).where(eq(crypto_platform_fee_table.uid, uid)).execute();
+export const getAllCryptoPlatformFees = async () => {
+	const user = await getUser();
+	if (!user) return null;
+
+	const res = await db.select().from(crypto_platform_fee_table).where(eq(crypto_platform_fee_table.uid, user.id)).execute();
 	return res;
 }
 
-export const updateCryptoPlatformFee = async (id: number, uid: string, fee: Partial<CryptoPlatformFeeInsertT>) => {
-	const res = await db.update(crypto_platform_fee_table).set(fee).where(and(
-		eq(crypto_platform_fee_table.id, id),
-		eq(crypto_platform_fee_table.uid, uid)
+export const updateCryptoPlatformFee = async (id: number, data: Partial<CryptoPlatformFeeInsertT>) => {
+	const user = await getUser();
+	if (!user) return null;
+
+	const validatedId = validateId(id);
+	if (!validatedId) return null;
+
+	const validatedData = validateUpdate(user, data);
+	if (!validatedData) return null;
+
+	const res = await db.update(crypto_platform_fee_table).set(validatedData).where(and(
+		eq(crypto_platform_fee_table.id, validatedId),
+		eq(crypto_platform_fee_table.uid, user.id)
 	)).returning().execute();
 	if (res.length === 0) {
 		return null;
@@ -47,10 +66,16 @@ export const updateCryptoPlatformFee = async (id: number, uid: string, fee: Part
 	return res[0];
 }
 
-export const deleteCryptoPlatformFee = async (id: number, uid: string) => {
+export const deleteCryptoPlatformFee = async (id: number) => {
+	const user = await getUser();
+	if (!user) return null;
+
+	const validatedId = validateId(id);
+	if (!validatedId) return null;
+
 	const res = await db.delete(crypto_platform_fee_table).where(and(
-		eq(crypto_platform_fee_table.id, id),
-		eq(crypto_platform_fee_table.uid, uid)
+		eq(crypto_platform_fee_table.id, validatedId),
+		eq(crypto_platform_fee_table.uid, user.id)
 	)).returning().execute();
 	if (res.length === 0) {
 		return null;
@@ -58,8 +83,11 @@ export const deleteCryptoPlatformFee = async (id: number, uid: string) => {
 	return res[0];
 }
 
-export const deleteAllCryptoPlatformFees = async (uid: string) => {
-	const res = await db.delete(crypto_platform_fee_table).where(eq(crypto_platform_fee_table.uid, uid)).returning().execute();
+export const deleteAllCryptoPlatformFees = async () => {
+	const user = await getUser();
+	if (!user) return null;
+
+	const res = await db.delete(crypto_platform_fee_table).where(eq(crypto_platform_fee_table.uid, user.id)).returning().execute();
 	return res;
 }
 
@@ -68,31 +96,13 @@ const insertSchema = createInsertSchema(crypto_platform_fee_table);
 const updateSchema = createUpdateSchema(crypto_platform_fee_table);
 
 const validateSelect = (user: User, data: CryptoPlatformFeeT) => {
-	const validatedData = selectSchema.safeParse(data);
-	if (!validatedData.success) {
-		console.error("Invalid trade data", validatedData.error.format());
-		return null;
-	}
-	validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validateData<CryptoPlatformFeeT, typeof selectSchema>(user, data, selectSchema);
 }
 
 const validateInsert = (user: User, data: CryptoPlatformFeeInsertT) => {
-	const validatedData = insertSchema.safeParse(data);
-	if (!validatedData.success) {
-		console.error("Invalid trade data", validatedData.error.format());
-		return null;
-	}
-	validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validateData<CryptoPlatformFeeInsertT, typeof insertSchema>(user, data, insertSchema);
 }
 
 const validateUpdate = (user: User, data: Partial<CryptoPlatformFeeInsertT>) => {
-	const validatedData = updateSchema.safeParse(data);
-	if (!validatedData.success) {
-		console.error("Invalid trade data", validatedData.error.format());
-		return null;
-	}
-	validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validateData<Partial<CryptoPlatformFeeInsertT>, typeof updateSchema>(user, data, updateSchema);
 }

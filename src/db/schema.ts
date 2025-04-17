@@ -1,5 +1,4 @@
 import { doublePrecision, integer, pgEnum, pgTable, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from 'drizzle-zod';
 
 export const crypto_trade_platform_enum = pgEnum("crypto_trade_platform", ["BINANCE"]);
 export const crypto_trade_side_enum = pgEnum("crypto_trade_side", ["BUY", "SELL"]);

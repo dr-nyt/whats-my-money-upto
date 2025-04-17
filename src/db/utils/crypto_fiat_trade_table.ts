@@ -5,16 +5,16 @@ import { crypto_fiat_trade_table, CryptoFiatTradeInsertT, CryptoFiatTradeT } fro
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { User } from "@supabase/supabase-js";
 import { getUser } from "@/lib/supabase/server";
-import { validateId } from "./validator";
+import { validateData, validateId } from "./validator";
 
-export const createCryptoFiatTrade = async (trade: CryptoFiatTradeInsertT) => {
+export const createCryptoFiatTrade = async (data: CryptoFiatTradeInsertT) => {
 	const user = await getUser();
 	if (!user) return null;
 
-	const validatedTradeData = validateInsert(user, trade);
-	if (!validatedTradeData) return null;
+	const validatedData = validateInsert(user, data);
+	if (!validatedData) return null;
 
-	const res = await db.insert(crypto_fiat_trade_table).values(validatedTradeData).returning().execute();
+	const res = await db.insert(crypto_fiat_trade_table).values(validatedData).returning().execute();
 	if (res.length === 0) {
 		return null;
 	}
@@ -46,17 +46,17 @@ export const getAllCryptoFiatTrades = async () => {
 	return res;
 }
 
-export const updateCryptoFiatTrade = async (id: number, trade: Partial<CryptoFiatTradeInsertT>) => {
+export const updateCryptoFiatTrade = async (id: number, data: Partial<CryptoFiatTradeInsertT>) => {
 	const user = await getUser();
 	if (!user) return null;
 
 	const validatedId = validateId(id);
 	if (!validatedId) return null;
 
-	const validatedTradeData = validateUpdate(user, trade);
-	if (!validatedTradeData) return null;
+	const validatedData = validateUpdate(user, data);
+	if (!validatedData) return null;
 
-	const res = await db.update(crypto_fiat_trade_table).set(validatedTradeData).where(and(
+	const res = await db.update(crypto_fiat_trade_table).set(validatedData).where(and(
 		eq(crypto_fiat_trade_table.id, validatedId),
 		eq(crypto_fiat_trade_table.uid, user.id)
 	)).returning().execute();
@@ -96,31 +96,13 @@ const insertSchema = createInsertSchema(crypto_fiat_trade_table);
 const updateSchema = createUpdateSchema(crypto_fiat_trade_table);
 
 const validateSelect = (user: User, data: CryptoFiatTradeT) => {
-	const validatedData = selectSchema.safeParse(data);
-	if (!validatedData.success) {
-		console.error("Invalid trade data", validatedData.error.format());
-		return null;
-	}
-	validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validateData<CryptoFiatTradeT, typeof selectSchema>(user, data, selectSchema);
 }
 
 const validateInsert = (user: User, data: CryptoFiatTradeInsertT) => {
-	const validatedData = insertSchema.safeParse(data);
-	if (!validatedData.success) {
-		console.error("Invalid trade data", validatedData.error.format());
-		return null;
-	}
-	validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validateData<CryptoFiatTradeInsertT, typeof insertSchema>(user, data, insertSchema);
 }
 
 const validateUpdate = (user: User, data: Partial<CryptoFiatTradeInsertT>) => {
-	const validatedData = updateSchema.safeParse(data);
-	if (!validatedData.success) {
-		console.error("Invalid trade data", validatedData.error.format());
-		return null;
-	}
-	validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validateData<Partial<CryptoFiatTradeInsertT>, typeof updateSchema>(user, data, updateSchema);
 }
