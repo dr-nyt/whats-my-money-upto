@@ -1,3 +1,4 @@
+import CryptoTradeForm from "@/lib/components/crypto_trade_form";
 import { logout } from "./auth/actions";
 
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
 				if (hello)
 				then_bye(0123456789);
 			</code>
+			<CryptoTradeForm />
 			<form action={logout}>
 				<button type="submit">Logout</button>
 			</form>
