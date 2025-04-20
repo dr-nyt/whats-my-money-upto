@@ -16,8 +16,10 @@ type ComboboxUIItemT = {
 type ComboboxUIPropsT = {
 	items: ComboboxUIItemT[];
 	itemName?: string;
+	buttonClassName?: string;
+	contentClassName?: string;
 }
-export function ComboBoxUI({ itemName, items }: ComboboxUIPropsT) {
+export function ComboBoxUI({ itemName, items, buttonClassName = "", contentClassName = "" }: ComboboxUIPropsT) {
 	const [open, setOpen] = useState(false)
 	const [value, setValue] = useState("")
 
@@ -28,7 +30,11 @@ export function ComboBoxUI({ itemName, items }: ComboboxUIPropsT) {
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
-					className="w-[200px] justify-between"
+					className={cn(
+						buttonClassName,
+						"justify-between",
+						!value && "text-muted-foreground"
+					)}
 				>
 					{value
 						? items.find((item) => item.value === value)?.label
@@ -36,7 +42,10 @@ export function ComboBoxUI({ itemName, items }: ComboboxUIPropsT) {
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-[200px] p-0">
+			<PopoverContent className={cn(
+				contentClassName,
+				"w-[var(--radix-popover-trigger-width)] mt-1",
+			)}>
 				<Command>
 					<CommandInput placeholder={`Search`} />
 					<CommandList>
@@ -73,8 +82,10 @@ type ComboBoxFormUIPropsT = {
 	field: ControllerRenderProps<any>;
 	items: ComboboxUIItemT[];
 	itemName?: string;
+	buttonClassName?: string;
+	contentClassName?: string;
 }
-export function ComboBoxFormUI({ form, field, items, itemName }: ComboBoxFormUIPropsT) {
+export function ComboBoxFormUI({ form, field, items, itemName, buttonClassName = "", contentClassName = "" }: ComboBoxFormUIPropsT) {
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
@@ -83,7 +94,8 @@ export function ComboBoxFormUI({ form, field, items, itemName }: ComboBoxFormUIP
 						variant="outline"
 						role="combobox"
 						className={cn(
-							"w-[200px] justify-between",
+							buttonClassName,
+							"justify-between",
 							!field.value && "text-muted-foreground"
 						)}
 					>
@@ -96,7 +108,10 @@ export function ComboBoxFormUI({ form, field, items, itemName }: ComboBoxFormUIP
 					</Button>
 				</FormControl>
 			</PopoverTrigger>
-			<PopoverContent className="w-[200px] p-0">
+			<PopoverContent className={cn(
+				contentClassName,
+				"w-[var(--radix-popover-trigger-width)] mt-1",
+			)}>
 				<Command>
 					<CommandInput
 						placeholder={`Search`}

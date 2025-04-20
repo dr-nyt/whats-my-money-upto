@@ -35,6 +35,6 @@ export const FormItemUI = ({ label, description, children, withoutFormControl = 
 		{label && <FormLabel>{label}</FormLabel>}
 		{withoutFormControl ? children : <FormControl>{children}</FormControl>}
 		{description && <FormDescription className="-mt-1">{description}</FormDescription>}
-		<FormMessage className="-mt-2" />
+		<FormMessage className={`${description ? "-mt-2" : "-mt-1"}`} />
 	</FormItem>
 }

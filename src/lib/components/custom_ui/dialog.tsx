@@ -48,7 +48,7 @@ type DialogFormUIPropsT = {
 }
 export function DialogFormUI({ form, trigger, triggerAsChild = true, className = "", title, description, children, onSubmit = () => { }, submitButtonText = "Submit" }: DialogFormUIPropsT) {
 	return (
-		<Dialog>
+		<Dialog onOpenChange={(open) => !open && form.reset()}>
 			<DialogTrigger asChild={triggerAsChild}>
 				{trigger}
 			</DialogTrigger>
