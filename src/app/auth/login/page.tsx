@@ -1,5 +1,5 @@
 'use client';
-import { useActionState } from 'react';
+import { startTransition, useActionState } from 'react';
 import { login } from '../actions';
 import { CircleNotch } from '@mynaui/icons-react';
 import Link from 'next/link';
@@ -10,9 +10,17 @@ import { Input } from '@/lib/components/ui/input';
 export default function SignupForm() {
 	const [state, loginAction, pending] = useActionState(login, undefined);
 
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
+		startTransition(() => {
+			loginAction(formData);
+		});
+	}
+
 	return (
 		<main className="flex flex-col items-center justify-center min-h-screen">
-			<form action={loginAction}>
+			<form onSubmit={handleSubmit}>
 				<Card className="w-[350px]">
 					<CardHeader>
 						<CardTitle className="text-2xl">Login</CardTitle>

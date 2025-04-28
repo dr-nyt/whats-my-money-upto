@@ -27,7 +27,7 @@ export default function SignupForm() {
 			<form action={loginAction}>
 				<Card className="w-[350px]">
 					<CardHeader>
-						<CardTitle className="text-2xl">Reset Password</CardTitle>
+						<CardTitle className="text-2xl">Update Password</CardTitle>
 						<CardDescription className="text-red-400">{state?.errors?.other}</CardDescription>
 					</CardHeader>
 					<CardContent>
