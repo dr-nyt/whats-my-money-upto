@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/lib/components/ui/card';
 import { Input } from '@/lib/components/ui/input';
 import { Button } from '@/lib/components/ui/button';
-import { FormPasswordInputUI } from '@/lib/components/custom_ui/form';
+import { PasswordInputUI } from '@/lib/components/custom_ui/input';
 
 export default function SignupForm() {
 	const [state, signUpAction, pending] = useActionState(signup, undefined);
@@ -32,7 +32,7 @@ export default function SignupForm() {
 						</div>
 						<p className="text-xs text-red-400 mb-4">{state?.errors?.email}</p>
 
-						<FormPasswordInputUI />
+						<PasswordInputUI />
 						<div className="text-xs text-red-400 mb-4">
 							{state?.errors?.password && (
 								<>
@@ -46,7 +46,7 @@ export default function SignupForm() {
 							)}
 						</div>
 
-						<FormPasswordInputUI id="rePassword" label="retype password" />
+						<PasswordInputUI id="rePassword" label="retype password" />
 						<p className="text-xs text-red-400 mb-4">{state?.errors?.rePassword}</p>
 
 					</CardContent>

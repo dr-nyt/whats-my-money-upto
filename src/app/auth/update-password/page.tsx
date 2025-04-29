@@ -7,7 +7,7 @@ import { Input } from '@/lib/components/ui/input';
 import { updatePassword } from '../actions';
 import { cGetUser } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { FormPasswordInputUI } from '@/lib/components/custom_ui/form';
+import { PasswordInputUI } from '@/lib/components/custom_ui/input';
 
 export default function SignupForm() {
 	const [state, updatePassAction, pending] = useActionState(updatePassword, undefined);
@@ -57,7 +57,7 @@ export default function SignupForm() {
 						</div>
 						<p className="text-xs text-red-400 mb-4">{state?.errors?.email}</p>
 
-						<FormPasswordInputUI />
+						<PasswordInputUI />
 						<div className="text-xs text-red-400 mb-4">
 							{state?.errors?.password && (
 								<>
@@ -71,7 +71,7 @@ export default function SignupForm() {
 							)}
 						</div>
 
-						<FormPasswordInputUI id="rePassword" label="retype password" />
+						<PasswordInputUI id="rePassword" label="retype password" />
 						<p className="text-xs text-red-400 mb-4">{state?.errors?.rePassword}</p>
 					</CardContent>
 					<CardFooter className="flex justify-between">

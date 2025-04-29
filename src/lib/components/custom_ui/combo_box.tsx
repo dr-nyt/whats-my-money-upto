@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Popover, PopoverTrigger } from "../ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { PopoverContent } from "@radix-ui/react-popover";
@@ -8,20 +8,22 @@ import { cn } from "../../utils";
 import { Button } from "../ui/button";
 import { ControllerRenderProps, UseFormReturn } from "react-hook-form";
 import { FormControl } from "../ui/form";
+import { FormItemUI } from "./form";
 
 type ComboboxUIItemT = {
 	label: string;
 	value: string;
 }
 type ComboboxUIPropsT = {
+	value: string;
+	setValue: Dispatch<SetStateAction<string>>;
 	items: ComboboxUIItemT[];
-	itemName?: string;
+	placeholder?: string;
 	buttonClassName?: string;
 	contentClassName?: string;
 }
-export function ComboBoxUI({ itemName, items, buttonClassName = "", contentClassName = "" }: ComboboxUIPropsT) {
-	const [open, setOpen] = useState(false)
-	const [value, setValue] = useState("")
+export function ComboBoxUI({ value, setValue, placeholder, items, buttonClassName = "", contentClassName = "" }: ComboboxUIPropsT) {
+	const [open, setOpen] = useState(false);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -38,7 +40,7 @@ export function ComboBoxUI({ itemName, items, buttonClassName = "", contentClass
 				>
 					{value
 						? items.find((item) => item.value === value)?.label
-						: itemName ? `Select ${itemName}...` : "None"}
+						: placeholder ? placeholder : "None"}
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
@@ -56,8 +58,8 @@ export function ComboBoxUI({ itemName, items, buttonClassName = "", contentClass
 									key={item.value}
 									value={item.value}
 									onSelect={(currentValue) => {
-										setValue(currentValue === value ? "" : currentValue)
-										setOpen(false)
+										setValue(currentValue === value ? "" : currentValue);
+										setOpen(false);
 									}}
 								>
 									<Check
@@ -81,68 +83,77 @@ type ComboBoxFormUIPropsT = {
 	form: UseFormReturn<any>;
 	field: ControllerRenderProps<any>;
 	items: ComboboxUIItemT[];
-	itemName?: string;
+	label?: string;
+	description?: string;
+	placeholder?: string;
 	buttonClassName?: string;
 	contentClassName?: string;
 }
-export function ComboBoxFormUI({ form, field, items, itemName, buttonClassName = "", contentClassName = "" }: ComboBoxFormUIPropsT) {
+export function ComboBoxFormUI({ form, field, items, label, description, placeholder, buttonClassName = "", contentClassName = "" }: ComboBoxFormUIPropsT) {
+	const [open, setOpen] = useState(false);
+
 	return (
-		<Popover>
-			<PopoverTrigger asChild>
-				<FormControl>
-					<Button
-						variant="outline"
-						role="combobox"
-						className={cn(
-							buttonClassName,
-							"justify-between",
-							!field.value && "text-muted-foreground"
-						)}
-					>
-						{field.value
-							? items.find(
-								(item) => item.value === field.value
-							)?.label
-							: itemName ? `Select ${itemName}...` : "None"}
-						<ChevronsUpDown className="opacity-50" />
-					</Button>
-				</FormControl>
-			</PopoverTrigger>
-			<PopoverContent className={cn(
-				contentClassName,
-				"w-[var(--radix-popover-trigger-width)] mt-1",
-			)}>
-				<Command>
-					<CommandInput
-						placeholder={`Search`}
-						className="h-9"
-					/>
-					<CommandList>
-						<CommandEmpty>No framework found.</CommandEmpty>
-						<CommandGroup>
-							{items.map((item) => (
-								<CommandItem
-									value={item.label}
-									key={item.value}
-									onSelect={() => {
-										form.setValue(field.name, item.value)
-									}}
-								>
-									{item.label}
-									<Check
-										className={cn(
-											"ml-auto",
-											item.value === field.value
-												? "opacity-100"
-												: "opacity-0"
-										)}
-									/>
-								</CommandItem>
-							))}
-						</CommandGroup>
-					</CommandList>
-				</Command>
-			</PopoverContent>
-		</Popover>
-	)
+		<FormItemUI withoutFormControl label={label} description={description}>
+			<Popover open={open} onOpenChange={setOpen}>
+				<PopoverTrigger asChild>
+					<FormControl>
+						<Button
+							variant="outline"
+							role="combobox"
+							aria-expanded={open}
+							className={cn(
+								buttonClassName,
+								"justify-between",
+								!field.value && "text-muted-foreground"
+							)}
+						>
+							{field.value
+								? items.find(
+									(item) => item.value === field.value
+								)?.label
+								: placeholder ? placeholder : "None"}
+							<ChevronsUpDown className="opacity-50" />
+						</Button>
+					</FormControl>
+				</PopoverTrigger>
+				<PopoverContent className={cn(
+					contentClassName,
+					"w-[var(--radix-popover-trigger-width)] mt-1",
+				)}>
+					<Command>
+						<CommandInput
+							placeholder={`Search`}
+							className="h-9"
+						/>
+						<CommandList>
+							<CommandEmpty>No framework found.</CommandEmpty>
+							<CommandGroup>
+								{items.map((item) => (
+									<CommandItem
+										value={item.label}
+										key={item.value}
+										onSelect={() => {
+											form.clearErrors(field.name);
+											form.setValue(field.name, item.value);
+											setOpen(false);
+										}}
+									>
+										{item.label}
+										<Check
+											className={cn(
+												"ml-auto",
+												item.value === field.value
+													? "opacity-100"
+													: "opacity-0"
+											)}
+										/>
+									</CommandItem>
+								))}
+							</CommandGroup>
+						</CommandList>
+					</Command>
+				</PopoverContent>
+			</Popover>
+		</FormItemUI>
+	);
 }
