@@ -150,7 +150,8 @@ export async function resetPassword(state: AuthFormState, formData: FormData): P
 	}
 
 	revalidatePath('/', 'layout');
-	redirect('/auth/login?reset=true');
+	// redirect('/auth/login?reset=true');
+	return { message: 'Check your email for the reset link.' };
 }
 
 export async function updatePassword(state: AuthFormState, formData: FormData): Promise<AuthFormState> {

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/lib/components/ui/card';
 import { Button } from '@/lib/components/ui/button';
 import { Input } from '@/lib/components/ui/input';
+import { FormPasswordInputUI } from '@/lib/components/custom_ui/form';
 
 export default function SignupForm() {
 	const [state, loginAction, pending] = useActionState(login, undefined);
@@ -34,15 +35,7 @@ export default function SignupForm() {
 						</div>
 						<p className="text-xs text-red-400 mb-4">{state?.errors?.email}</p>
 
-						<div className="flex flex-col gap-1">
-							<label htmlFor="password" className="text-sm">password</label>
-							<div className="flex gap-1">
-								<Input id="password" name="password" type={showPassword ? "text" : "password"} className="px-2 py-1" required />
-								<Button variant="ghost" size="icon" type="button" className="cursor-pointer" onClick={() => setShowPassword(v => !v)}>
-									{showPassword ? <Eye /> : <EyeSlash />}
-								</Button>
-							</div>
-						</div>
+						<FormPasswordInputUI />
 						<Link href="/auth/reset-password" className="text-sm hover:underline">Forgot password?</Link>
 						<p className="text-xs text-red-400 mb-4">{state?.errors?.password}</p>
 
