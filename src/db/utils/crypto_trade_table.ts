@@ -6,6 +6,7 @@ import { sGetUser } from "@/lib/supabase/server";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { User } from "@supabase/supabase-js";
 import { validateData, validateId } from "./validator";
+import { revalidatePath } from "next/cache";
 
 type FormState = {
 	errors?: {
@@ -21,9 +22,9 @@ export const createCryptoTrade = async (state: FormState, data: CryptoTradeInser
 	const validatedData = validateInsert(user, data);
 	if (!validatedData.success) return { errors: validatedData.error.flatten().fieldErrors };
 
-	console.log("!!!Validated data:", validatedData.data);
 	try {
 		const res = await db.insert(crypto_trade_table).values(validatedData.data).returning().execute();
+		revalidatePath("/");
 		return { data: res };
 	} catch (error) {
 		console.error("createCryptoTrade:", error);
@@ -48,9 +49,9 @@ export const getCryptoTrade = async (id: number): Promise<CryptoTradeT | null> =
 	return res[0];
 }
 
-export const getAllCryptoTrades = async (): Promise<CryptoTradeT[] | null> => {
+export const getAllCryptoTrades = async (): Promise<CryptoTradeT[]> => {
 	const user = await sGetUser();
-	if (!user) return null;
+	if (!user) return [];
 
 	const res = await db.select().from(crypto_trade_table).where(eq(crypto_trade_table.uid, user.id)).execute();
 	return res;
@@ -90,6 +91,7 @@ export const deleteCryptoTrade = async (id: number): Promise<CryptoTradeT | null
 	if (res.length === 0) {
 		return null;
 	}
+	revalidatePath("/");
 	return res[0];
 }
 

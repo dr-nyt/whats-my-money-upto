@@ -6,6 +6,7 @@ import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import { CircleNotch } from "@mynaui/icons-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 
 type DialogUIPropsT = {
 	trigger: ReactNode;
@@ -84,4 +85,33 @@ export function DialogFormUI({ form, trigger, open, setOpen, triggerAsChild = tr
 			</DialogContent>
 		</Dialog>
 	);
+}
+
+type AlertDialogUIPropsT = {
+	trigger: ReactNode;
+	title?: string;
+	description?: string;
+	acceptText?: string;
+	cancelText?: string;
+	onAccept?: () => void;
+	onCancel?: () => void;
+}
+export const AlertDialogUI = ({ trigger, title, description, acceptText = "Continue", cancelText = "Cancel", onAccept = () => { }, onCancel = () => { } }: AlertDialogUIPropsT) => {
+	return (
+		<AlertDialog>
+			<AlertDialogTrigger asChild>
+				{trigger}
+			</AlertDialogTrigger>
+			<AlertDialogContent>
+				{(title || description) && <AlertDialogHeader>
+					{title && <AlertDialogTitle>{title}</AlertDialogTitle>}
+					{description && <AlertDialogDescription>{description}</AlertDialogDescription>}
+				</AlertDialogHeader>}
+				<AlertDialogFooter>
+					<AlertDialogCancel onClick={onCancel}>{cancelText}</AlertDialogCancel>
+					<AlertDialogAction onClick={onAccept}>{acceptText}</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
+	)
 }

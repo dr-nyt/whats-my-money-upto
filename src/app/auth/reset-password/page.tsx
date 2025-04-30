@@ -49,7 +49,7 @@ export default function SignupForm() {
 						<Button variant="secondary" asChild>
 							<Link href="/auth/login"><ChevronLeft /> Login</Link>
 						</Button>
-						<Button type="submit" disabled={pending || !!message} className="cursor-pointer disabled:cursor-default">
+						<Button type="submit" disabled={pending || !!message}>
 							{pending ? <CircleNotch className="animate-spin" /> : !!message ? <Check /> : "Reset Password"}
 						</Button>
 					</CardFooter>

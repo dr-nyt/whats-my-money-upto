@@ -13,9 +13,7 @@ export const validateId = (id: number) => {
 }
 
 export const validateData = <T, S>(user: User, data: T, schema: S) => {
-	console.log("!!!User:", user.id);
 	if ((data as any).uid !== undefined) (data as any).uid = user.id;
-	console.log("!!!Data:", data);
 	const validatedData = (schema as any).safeParse(data) as SafeParseReturnType<T, T>;
 	if (!validatedData.success) {
 		console.error("Invalid data", validatedData.error.format());

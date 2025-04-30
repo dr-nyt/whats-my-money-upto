@@ -78,7 +78,7 @@ export default function SignupForm() {
 						<Button variant="secondary" asChild>
 							<Link href="/auth/login"><ChevronLeft /> Login</Link>
 						</Button>
-						<Button type="submit" disabled={pending} className="cursor-pointer disabled:cursor-default">{pending ?
+						<Button type="submit" disabled={pending}>{pending ?
 							<CircleNotch className="animate-spin" />
 							: "Update Password"
 						}</Button>

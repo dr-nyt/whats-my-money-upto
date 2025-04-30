@@ -28,7 +28,7 @@ export const PasswordInputUI = ({ id = "password", label = "password", descripti
 		<label htmlFor={id} className="text-sm">{label}</label>
 		<div className="flex gap-1">
 			<Input id={id} name={id} type={showPassword ? "text" : "password"} className="px-2 py-1" required={required} placeholder={placeholder} />
-			<Button variant="ghost" size="icon" type="button" className="cursor-pointer" onClick={() => setShowPassword(v => !v)}>
+			<Button variant="ghost" size="icon" type="button" onClick={() => setShowPassword(v => !v)}>
 				{showPassword ? <Eye /> : <EyeSlash />}
 			</Button>
 		</div>

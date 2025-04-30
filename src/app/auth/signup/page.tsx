@@ -56,7 +56,7 @@ export default function SignupForm() {
 								Already have an account?
 							</Link>
 						</Button>
-						<Button type="submit" disabled={pending} className="cursor-pointer disabled:cursor-default">{pending ?
+						<Button type="submit" disabled={pending}>{pending ?
 							<CircleNotch className="animate-spin" />
 							: "Sign Up"
 						}</Button>

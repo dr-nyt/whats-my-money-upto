@@ -51,7 +51,6 @@ export default function CryptoTradeForm() {
 	});
 
 	useEffect(() => {
-		console.log("!!!State:", state);
 		if (state?.data?.length) {
 			form.reset();
 			setIsDialogOpen(false);
@@ -154,7 +153,6 @@ export default function CryptoTradeForm() {
 							/>
 							<Button
 								type="button" variant="secondary" size="icon"
-								className="cursor-pointer"
 								onClick={addFee}>
 								<Plus />
 							</Button>
@@ -170,7 +168,6 @@ export default function CryptoTradeForm() {
 												{!!error && <p className="text-xs font-normal">{error}</p>}
 											</div>
 											<Button
-												className="cursor-pointer"
 												type="button" variant="destructive" size="icon"
 												onClick={() => removeFee(index)}
 											>

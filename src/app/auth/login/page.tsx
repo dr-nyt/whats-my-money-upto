@@ -46,7 +46,7 @@ export default function SignupForm() {
 								Don't have an account?
 							</Link>
 						</Button>
-						<Button type="submit" disabled={pending} className="cursor-pointer disabled:cursor-default">{pending ?
+						<Button type="submit" disabled={pending}>{pending ?
 							<CircleNotch className="animate-spin" />
 							: <div className='flex items-center gap-1'>
 								Login
