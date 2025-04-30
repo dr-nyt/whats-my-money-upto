@@ -13,11 +13,13 @@ export const validateId = (id: number) => {
 }
 
 export const validateData = <T, S>(user: User, data: T, schema: S) => {
-	const validatedData = (schema as any).safeParse(data) as SafeParseReturnType<T, any>;
+	console.log("!!!User:", user.id);
+	if ((data as any).uid !== undefined) (data as any).uid = user.id;
+	console.log("!!!Data:", data);
+	const validatedData = (schema as any).safeParse(data) as SafeParseReturnType<T, T>;
 	if (!validatedData.success) {
 		console.error("Invalid data", validatedData.error.format());
-		return null;
+		return validatedData;
 	}
-	if (validatedData.data.uid) validatedData.data.uid = user.id;
-	return validatedData.data;
+	return validatedData;
 }

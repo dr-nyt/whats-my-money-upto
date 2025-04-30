@@ -7,18 +7,28 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import { User } from "@supabase/supabase-js";
 import { validateData, validateId } from "./validator";
 
-export const createCryptoTrade = async (data: CryptoTradeInsertT): Promise<CryptoTradeT | null> => {
+type FormState = {
+	errors?: {
+		other?: string;
+	} & Partial<Record<keyof CryptoTradeT, string[]>>;
+	data?: CryptoTradeT[];
+} | undefined;
+
+export const createCryptoTrade = async (state: FormState, data: CryptoTradeInsertT): Promise<FormState> => {
 	const user = await sGetUser();
-	if (!user) return null;
+	if (!user) return { errors: { other: "User authentication failed" } };
 
 	const validatedData = validateInsert(user, data);
-	if (!validatedData) return null;
+	if (!validatedData.success) return { errors: validatedData.error.flatten().fieldErrors };
 
-	const res = await db.insert(crypto_trade_table).values(validatedData).returning().execute();
-	if (res.length === 0) {
-		return null;
+	console.log("!!!Validated data:", validatedData.data);
+	try {
+		const res = await db.insert(crypto_trade_table).values(validatedData.data).returning().execute();
+		return { data: res };
+	} catch (error) {
+		console.error("createCryptoTrade:", error);
+		return { errors: { other: "Error creating crypto trade" } };
 	}
-	return res[0];
 }
 
 export const getCryptoTrade = async (id: number): Promise<CryptoTradeT | null> => {
@@ -54,9 +64,9 @@ export const updateCryptoTrade = async (id: number, data: Partial<CryptoTradeIns
 	if (!validatedId) return null;
 
 	const validatedData = validateUpdate(user, data);
-	if (!validatedData) return null;
+	if (!validatedData.success) return null;
 
-	const res = await db.update(crypto_trade_table).set(validatedData).where(and(
+	const res = await db.update(crypto_trade_table).set(validatedData.data).where(and(
 		eq(crypto_trade_table.id, validatedId),
 		eq(crypto_trade_table.uid, user.id)
 	)).returning().execute();

@@ -11,7 +11,7 @@ export const crypto_trade_table = pgTable("crypto_trade", {
 	side: crypto_trade_side_enum().notNull(),
 	market_price: doublePrecision().notNull(),
 	amount: doublePrecision().notNull(),
-	fees: jsonb().$type<{ name: string, amount: number }>().array().notNull(),
+	fees: jsonb().$type<{ data: { name: string, amount: number }[] }>().default({ data: [] }).notNull(),
 	platform: crypto_trade_platform_enum().notNull(),
 	time: timestamp({ withTimezone: true }).notNull(),
 
@@ -29,7 +29,7 @@ export const crypto_fiat_trade_table = pgTable("crypto_fiat_trade", {
 	rate: doublePrecision().notNull(),
 	amount: doublePrecision().notNull(),
 	side: crypto_trade_side_enum().notNull(),
-	fees: jsonb().$type<{ name: string, amount: number }>().array().notNull(),
+	fees: jsonb().$type<{ data: { name: string, amount: number }[] }>().default({ data: [] }).notNull(),
 	platform: crypto_trade_platform_enum().notNull(),
 	time: timestamp({ withTimezone: true }).notNull(),
 

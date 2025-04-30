@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Form, FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { CircleNotch } from "@mynaui/icons-react";
 
 type FormUIPropsT = {
 	form: UseFormReturn<any, any, any>;
@@ -14,13 +15,17 @@ type FormUIPropsT = {
 	submitButtonText?: string;
 	className?: string;
 	withoutSubmitButton?: boolean;
+	disabled?: boolean;
+	isLoading?: boolean;
 }
-export const FormUI = ({ form, children, onSubmit = () => { }, submitButtonText = "Submit", className = "", withoutSubmitButton = false }: FormUIPropsT) => {
+export const FormUI = ({ form, children, onSubmit = () => { }, submitButtonText = "Submit", className = "", withoutSubmitButton = false, disabled = false, isLoading = false }: FormUIPropsT) => {
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className={className}>
 				{children}
-				{!withoutSubmitButton && <Button type="submit">{submitButtonText}</Button>}
+				{!withoutSubmitButton && <Button type="submit" disabled={disabled || isLoading}>
+					{isLoading ? <CircleNotch className="animate-spin" /> : submitButtonText}
+				</Button>}
 			</form>
 		</Form>
 	)

@@ -1,0 +1,2 @@
+ALTER TABLE "crypto_fiat_trade" ADD COLUMN "fees" jsonb DEFAULT '{"data":[]}'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "crypto_trade" ADD COLUMN "fees" jsonb DEFAULT '{"data":[]}'::jsonb NOT NULL;

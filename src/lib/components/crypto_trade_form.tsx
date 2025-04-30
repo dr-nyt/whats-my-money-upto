@@ -8,14 +8,16 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { FormField } from "./ui/form";
 import { FormItemUI } from "./custom_ui/form";
 import CryptoSymbols from "@/lib/crypto_symbols.json";
-import { crypto_trade_platform_enum, crypto_trade_side_enum } from "@/db/schema";
-import { SelectFormUI, SelectUI } from "./custom_ui/select";
+import { crypto_trade_platform_enum, crypto_trade_side_enum, CryptoTradeInsertT } from "@/db/schema";
+import { SelectFormUI } from "./custom_ui/select";
 import { Input } from "./ui/input";
 import { DatePickerFormUI, InputFormUI } from "./custom_ui/input";
-import { Delete, DeleteSolid, Plus, Trash, TrashSolid } from "@mynaui/icons-react";
-import { useState } from "react";
+import { Plus, TrashSolid } from "@mynaui/icons-react";
+import { startTransition, useActionState, useEffect, useState } from "react";
+import { createCryptoTrade } from "@/db/utils/crypto_trade_table";
+import { toast } from "sonner";
 
-const FormSchema = z.object({
+const FormSchema: z.ZodSchema<Omit<CryptoTradeInsertT, "uid">> = z.object({
 	pair_base: z.string({ message: "Pair base is required" }),
 	pair_main: z.string({ message: "Pair main is required" }),
 	side: z.enum(crypto_trade_side_enum.enumValues, {
@@ -24,10 +26,12 @@ const FormSchema = z.object({
 	market_price: z.coerce.number({ message: "Market price is required" })
 		.gt(0, "Market price must be greater than 0"),
 	amount: z.coerce.number({ message: "Amount is required" }).gt(0, "Amount must be greater than 0"),
-	fees: z.array(z.object({
-		name: z.string({ message: "Fee name is required" }),
-		amount: z.coerce.number({ message: "Fee amount is required" }).gt(0, "Fee amount must be greater than 0"),
-	})),
+	fees: z.object({
+		data: z.array(z.object({
+			name: z.string({ message: "Fee name is required" }),
+			amount: z.coerce.number({ message: "Fee amount is required" }).gt(0, "Fee amount must be greater than 0"),
+		}))
+	}).default({ data: [] }),
 	platform: z.enum(crypto_trade_platform_enum.enumValues, {
 		errorMap: () => ({ message: "Platform is required" })
 	}),
@@ -35,27 +39,50 @@ const FormSchema = z.object({
 });
 
 export default function CryptoTradeForm() {
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [feeName, setFeeName] = useState("");
 	const [feeAmount, setFeeAmount] = useState("");
-
 	const cryptoItems = CryptoSymbols.map((symbol) => ({ label: symbol, value: symbol }));
 
+	const [state, createCryptoTradeAction, pending] = useActionState(createCryptoTrade, undefined);
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
-		defaultValues: { fees: [] }
-	})
+		defaultValues: {}
+	});
 
-	function onSubmit(data: z.infer<typeof FormSchema>) {
-		console.log(data);
+	useEffect(() => {
+		console.log("!!!State:", state);
+		if (state?.data?.length) {
+			form.reset();
+			setIsDialogOpen(false);
+			toast.success(`${state.data[0].pair_main}/${state.data[0].pair_base} trade created successfully`);
+		} else if (state?.errors) {
+			const errorKeys = Object.keys(state.errors) as (keyof typeof state.errors)[];
+			const formKeys = Object.keys(form.formState.validatingFields) as (keyof z.infer<typeof FormSchema>)[];
+			if (!errorKeys.length) return;
+			for (const key of errorKeys) {
+				if (formKeys.includes(key as keyof z.infer<typeof FormSchema>)) {
+					form.setError(key as keyof z.infer<typeof FormSchema>, { message: state.errors[key] as string });
+				} else {
+					form.setError("root", { message: state.errors[key] as string });
+				}
+			}
+		}
+	}, [state]);
+
+	const onSubmit = (data: z.infer<typeof FormSchema>) => {
+		startTransition(() => {
+			createCryptoTradeAction({ uid: "", ...data });
+		});
 	}
 
 	const addFee = () => {
 		if (feeName && feeAmount) {
-			if (form.getValues("fees")?.find((fee) => fee.name === feeName))
+			if (form.getValues("fees.data")?.find((fee) => fee.name === feeName))
 				return form.setError("fees", { message: `${feeName} fee already exists` });
 			if (parseFloat(feeAmount) <= 0)
 				return form.setError("fees", { message: "Fee amount must be greater than 0" });
-			form.setValue("fees", [...(form.getValues("fees") || []), { name: feeName, amount: Number(feeAmount) }]);
+			form.setValue("fees.data", [...(form.getValues("fees")?.data || []), { name: feeName, amount: Number(feeAmount) }]);
 			form.clearErrors("fees");
 			setFeeName("");
 			setFeeAmount("");
@@ -66,9 +93,9 @@ export default function CryptoTradeForm() {
 	}
 
 	const removeFee = (index: number) => {
-		const fees = form.getValues("fees") || [];
+		const fees = form.getValues("fees.data") || [];
 		fees.splice(index, 1);
-		form.setValue("fees", fees);
+		form.setValue("fees.data", fees);
 		form.clearErrors("fees");
 	}
 
@@ -78,6 +105,8 @@ export default function CryptoTradeForm() {
 			trigger={<Button variant="outline" className="w-full">Add Crypto Trade</Button>}
 			onSubmit={onSubmit}
 			title="New Crypto Trade"
+			open={isDialogOpen} setOpen={setIsDialogOpen}
+			isLoading={pending}
 		>
 			<FormField control={form.control} name="pair_base" render={({ field }) => (
 				<ComboBoxFormUI form={form} field={field} label="Pair base" description="USDT in BTC/USDT"
@@ -114,7 +143,7 @@ export default function CryptoTradeForm() {
 					<div className="flex flex-col">
 						<div className="flex gap-2">
 							<ComboBoxUI
-								items={cryptoItems.filter((item) => field.value?.find((fee) => fee.name === item.value) === undefined)}
+								items={cryptoItems.filter((item) => field.value?.data.find((fee) => fee.name === item.value) === undefined)}
 								placeholder="Symbol"
 								buttonClassName="w-1/3"
 								value={feeName} setValue={setFeeName}
@@ -131,8 +160,8 @@ export default function CryptoTradeForm() {
 							</Button>
 						</div>
 						<div className="flex flex-col gap-2 mt-2">
-							{field.value?.map((fee, index) => {
-								const error = form.formState.errors.fees?.[index]?.amount?.message;
+							{field.value?.data.map((fee, index) => {
+								const error = form.formState.errors.fees?.data?.[index]?.amount?.message;
 								return (
 									<div className="flex flex-col">
 										<div className={`flex justify-between items-center pl-4 rounded-md ${error ? "bg-destructive py-1" : "bg-accent"}`} key={fee.name}>
