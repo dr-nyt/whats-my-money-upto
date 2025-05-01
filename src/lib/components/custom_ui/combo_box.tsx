@@ -86,14 +86,15 @@ type ComboBoxFormUIPropsT = {
 	label?: string;
 	description?: string;
 	placeholder?: string;
+	className?: string;
 	buttonClassName?: string;
 	contentClassName?: string;
 }
-export function ComboBoxFormUI({ form, field, items, label, description, placeholder, buttonClassName = "", contentClassName = "" }: ComboBoxFormUIPropsT) {
+export function ComboBoxFormUI({ form, field, items, label, description, placeholder, className = "", buttonClassName = "", contentClassName = "" }: ComboBoxFormUIPropsT) {
 	const [open, setOpen] = useState(false);
 
 	return (
-		<FormItemUI withoutFormControl label={label} description={description}>
+		<FormItemUI withoutFormControl label={label} description={description} className={className}>
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<FormControl>
@@ -118,7 +119,7 @@ export function ComboBoxFormUI({ form, field, items, label, description, placeho
 				</PopoverTrigger>
 				<PopoverContent className={cn(
 					contentClassName,
-					"w-[var(--radix-popover-trigger-width)] mt-1",
+					"w-[var(--radix-popover-trigger-width)] mt-1 z-10",
 				)}>
 					<Command>
 						<CommandInput

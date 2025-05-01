@@ -37,9 +37,10 @@ type FromItemUIPropsT = {
 	children?: ReactNode;
 	withoutFormControl?: boolean;
 	optional?: boolean;
+	className?: string;
 }
-export const FormItemUI = ({ label, description, children, withoutFormControl = false, optional = false }: FromItemUIPropsT) => {
-	return <FormItem>
+export const FormItemUI = ({ label, description, children, withoutFormControl = false, optional = false, className = "" }: FromItemUIPropsT) => {
+	return <FormItem className={className}>
 		{label && <FormLabel>{label} {optional && <Badge variant="secondary" className="font-light">Optional</Badge>}</FormLabel>}
 		{withoutFormControl ? children : <FormControl>{children}</FormControl>}
 		{description && <FormDescription className="-mt-1">{description}</FormDescription>}

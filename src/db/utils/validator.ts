@@ -3,7 +3,7 @@ import { SafeParseReturnType, z } from "zod";
 
 const idSchema = z.number().int().nonnegative().finite().safe();
 
-export const validateId = (id: number) => {
+export const validateId = (id?: number) => {
 	const validatedId = idSchema.safeParse(id);
 	if (!validatedId.success) {
 		console.error("Invalid trade ID", validatedId.error.format());

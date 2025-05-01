@@ -57,24 +57,27 @@ export const getAllCryptoTrades = async (): Promise<CryptoTradeT[]> => {
 	return res;
 }
 
-export const updateCryptoTrade = async (id: number, data: Partial<CryptoTradeInsertT>): Promise<CryptoTradeT | null> => {
+export const updateCryptoTrade = async (state: FormState, data: Partial<CryptoTradeT>): Promise<FormState> => {
 	const user = await sGetUser();
-	if (!user) return null;
+	if (!user) return { errors: { other: "User authentication failed" } };
 
-	const validatedId = validateId(id);
-	if (!validatedId) return null;
+	const validatedId = validateId(data.id);
+	if (!validatedId) return { errors: { other: "Invalid id" } };
 
 	const validatedData = validateUpdate(user, data);
-	if (!validatedData.success) return null;
+	if (!validatedData.success) return { errors: validatedData.error.flatten().fieldErrors };
 
-	const res = await db.update(crypto_trade_table).set(validatedData.data).where(and(
-		eq(crypto_trade_table.id, validatedId),
-		eq(crypto_trade_table.uid, user.id)
-	)).returning().execute();
-	if (res.length === 0) {
-		return null;
+	try {
+		const res = await db.update(crypto_trade_table).set(validatedData.data).where(and(
+			eq(crypto_trade_table.id, validatedId),
+			eq(crypto_trade_table.uid, user.id)
+		)).returning().execute();
+		revalidatePath("/");
+		return { data: res };
+	} catch (error) {
+		console.error("updateCryptoTrade:", error);
+		return { errors: { other: "Error creating crypto trade" } };
 	}
-	return res[0];
 }
 
 export const deleteCryptoTrade = async (id: number): Promise<CryptoTradeT | null> => {

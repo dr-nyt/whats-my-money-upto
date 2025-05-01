@@ -1,5 +1,5 @@
 "use client";
-import { HTMLInputTypeAttribute, useEffect, useState } from "react";
+import { Dispatch, HTMLInputTypeAttribute, SetStateAction, useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Eye } from "lucide-react";
@@ -14,6 +14,41 @@ import { ControllerRenderProps, UseFormReturn } from "react-hook-form";
 import { Matcher } from "react-day-picker";
 import { FormItemUI } from "./form";
 
+type InputUIPropsT = {
+	id?: string;
+	label?: string;
+	description?: string;
+	type?: HTMLInputTypeAttribute;
+	required?: boolean;
+	placeholder?: string;
+	className?: string;
+	wrapperClassName?: string;
+	disabled?: boolean;
+	value?: string;
+	setValue?: Dispatch<SetStateAction<string>>;
+	symbol?: string;
+	selectAllOnFocus?: boolean;
+}
+export const InputUI = ({ id = "", label = "", description, type = "text", required = false, placeholder = "", className = "", wrapperClassName = "", disabled, value, setValue = () => { }, symbol, selectAllOnFocus }: InputUIPropsT) => {
+	const [showPassword, setShowPassword] = useState(false);
+
+	return <div className={`flex flex-col gap-1 ${wrapperClassName}`}>
+		{label && <label htmlFor={id} className="text-sm">{label}</label>}
+		<div className="relative">
+			{symbol && <span className="absolute top-1/2 -translate-y-1/2 right-2 text-sm">{symbol}</span>}
+			<Input
+				id={id} name={id} type={type} className={`${symbol ? `pr-[6ch]` : ""}  [&::-webkit-inner-spin-button]:appearance-none ${className}`}
+				required={required} placeholder={placeholder} disabled={disabled}
+				value={value} onChange={(e) => setValue(e.target.value)}
+				onFocus={(e) => {
+					if (selectAllOnFocus) e.target.select();
+				}}
+			/>
+		</div>
+		{description && <p className="text-sm text-muted-foreground -mt-1">{description}</p>}
+	</div>
+}
+
 type PasswordInputUIPropsT = {
 	id?: string;
 	label?: string;
@@ -27,11 +62,12 @@ export const PasswordInputUI = ({ id = "password", label = "password", descripti
 	return <div className="flex flex-col gap-1">
 		<label htmlFor={id} className="text-sm">{label}</label>
 		<div className="flex gap-1">
-			<Input id={id} name={id} type={showPassword ? "text" : "password"} className="px-2 py-1" required={required} placeholder={placeholder} />
+			<Input id={id} name={id} type={showPassword ? "text" : "password"} required={required} placeholder={placeholder} />
 			<Button variant="ghost" size="icon" type="button" onClick={() => setShowPassword(v => !v)}>
 				{showPassword ? <Eye /> : <EyeSlash />}
 			</Button>
 		</div>
+		{description && <p className="text-sm text-muted-foreground -mt-1">{description}</p>}
 	</div>
 }
 
@@ -42,11 +78,29 @@ type InputFormUIPropsT = {
 	type?: HTMLInputTypeAttribute;
 	placeholder?: string;
 	className?: string;
+	wrapperClassName?: string;
+	symbol?: string;
+	onChange?: Dispatch<SetStateAction<string>>;
+	disabled?: boolean;
+	selectAllOnFocus?: boolean;
 }
-export const InputFormUI = ({ field, label, description, type, placeholder, className }: InputFormUIPropsT) => {
+export const InputFormUI = ({ field, label, description, type, placeholder, className = "", wrapperClassName = "", symbol = "", onChange = () => { }, disabled = false, selectAllOnFocus = false }: InputFormUIPropsT) => {
+	useEffect(() => {
+		if (onChange) onChange(field.value);
+	}, [field.value]);
+
 	return (
-		<FormItemUI label={label} description={description}>
-			<Input className={className} type={type} placeholder={placeholder} {...field} />
+		<FormItemUI label={label} description={description} className={wrapperClassName}>
+			<div className="relative">
+				{symbol && <span className="absolute top-1/2 -translate-y-1/2 right-2 text-sm">{symbol}</span>}
+				<Input
+					className={`${symbol ? `pr-[6ch]` : ""} [&::-webkit-inner-spin-button]:appearance-none ${className}`}
+					type={type} placeholder={placeholder} {...field} disabled={disabled}
+					onFocus={(e) => {
+						if (selectAllOnFocus) e.target.select();
+					}}
+				/>
+			</div>
 		</FormItemUI>
 	)
 }
@@ -57,20 +111,22 @@ type DatePickerFormUIPropsT = {
 	label?: string;
 	description?: string;
 	presets?: { label: string; value: number }[];
+	wrapperClassName?: string;
 	buttonClassName?: string;
 	contentClassName?: string;
 	defaultDateFn?: () => Date;
 	disabledDatesFn?: Matcher | Matcher[];
 	placeholder?: string;
+	onChange?: (date: Date) => void;
 }
-export function DatePickerFormUI({ form, field, label, description, presets = [], buttonClassName = "", contentClassName = "", defaultDateFn, disabledDatesFn, placeholder = "" }: DatePickerFormUIPropsT) {
+export function DatePickerFormUI({ form, field, label, description, presets = [], wrapperClassName = "", buttonClassName = "", contentClassName = "", defaultDateFn, disabledDatesFn, placeholder = "", onChange = () => { } }: DatePickerFormUIPropsT) {
 	useEffect(() => {
 		if (defaultDateFn)
 			setTimeout(() => form.setValue(field.name, defaultDateFn()), 500);
 	}, []);
 
 	return (
-		<FormItemUI withoutFormControl label={label} description={description}>
+		<FormItemUI withoutFormControl label={label} description={description} className={wrapperClassName}>
 			<Popover>
 				<PopoverTrigger asChild>
 					<FormControl>
@@ -83,7 +139,7 @@ export function DatePickerFormUI({ form, field, label, description, presets = []
 							)}
 						>
 							{field.value ? (
-								format(field.value, "PPP 'at' HH:mm O")
+								format(field.value, "dd/MM/yyyy")
 							) : (
 								<span>{placeholder}</span>
 							)}
@@ -112,7 +168,11 @@ export function DatePickerFormUI({ form, field, label, description, presets = []
 						<Calendar
 							mode="single"
 							selected={field.value}
-							onSelect={field.onChange}
+							onSelect={(date) => {
+								form.clearErrors(field.name);
+								form.setValue(field.name, date);
+								if (date) onChange(date);
+							}}
 							disabled={disabledDatesFn}
 							initialFocus
 						/>

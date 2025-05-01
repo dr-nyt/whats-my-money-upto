@@ -4,7 +4,7 @@ import { DataTableUI } from "@/lib/components/custom_ui/table";
 import { Suspense } from "react";
 import { getAllCryptoTrades } from "@/db/utils/crypto_trade_table";
 import { cryptoTradeColumns } from "@/lib/components/columns";
-import { CryptoTradeT } from "@/db/schema";
+import { Button } from "@/lib/components/ui/button";
 
 export default function Home() {
 	const dataP = getAllCryptoTrades();
@@ -63,7 +63,7 @@ export default function Home() {
 				if (hello)
 				then_bye(0123456789);
 			</code>
-			<CryptoTradeForm />
+			<CryptoTradeForm trigger={<Button variant="outline" className="w-full">Add Crypto Trade</Button>} />
 			<form action={logout}>
 				<button type="submit">Logout</button>
 			</form>

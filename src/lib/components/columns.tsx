@@ -7,6 +7,8 @@ import { ArrowDown, ArrowUp, ChevronUpDown, PencilSolid, TrashSolid } from "@myn
 import { AlertDialogUI } from "./custom_ui/dialog";
 import { deleteCryptoTrade } from "@/db/utils/crypto_trade_table";
 import { toast } from "sonner";
+import CryptoTradeForm from "./crypto_trade_form";
+import Decimal from "decimal.js";
 
 export const cryptoTradeColumns: ColumnDef<CryptoTradeT>[] = [
 	{
@@ -72,10 +74,10 @@ export const cryptoTradeColumns: ColumnDef<CryptoTradeT>[] = [
 		accessorKey: "total",
 		header: "Total",
 		cell: ({ row }) => {
-			const { side, market_price, amount, pair_base, pair_main } = row.original;
+			const { side, market_price, amount, pair_main } = row.original;
 			return <p className={`flex gap-1 items-center ${side === "BUY" ? "text-green-400" : "text-red-400"}`}>
 				{side === "SELL" ? <ArrowDown className="w-4" /> : <ArrowUp className="w-4" />}
-				{amount / market_price} {pair_main}
+				{Decimal.set({ precision: 6, defaults: true }).div(amount, market_price).toString()} {pair_main}
 			</p>
 		}
 	},
@@ -99,7 +101,10 @@ export const cryptoTradeColumns: ColumnDef<CryptoTradeT>[] = [
 			const { id, pair_base, pair_main } = row.original;
 			return (
 				<div className="flex gap-2 justify-end">
-					<Button variant="ghost" size="icon" onClick={() => console.log("Edit")}><PencilSolid /></Button>
+					<CryptoTradeForm
+						trigger={<Button variant="ghost" size="icon"><PencilSolid /></Button>}
+						trade={row.original} isUpdate resetOnClose
+					/>
 					<AlertDialogUI
 						trigger={<Button variant="destructive" size="icon"><TrashSolid /></Button>}
 						title="Delete Trade"

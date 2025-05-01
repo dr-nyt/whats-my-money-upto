@@ -56,14 +56,15 @@ type DialogFormUIPropsT = {
 	footerChildren?: ReactNode;
 	disabled?: boolean;
 	isLoading?: boolean;
+	generateOnOpen?: boolean;
 }
-export function DialogFormUI({ form, trigger, open, setOpen, triggerAsChild = true, className = "", title, description, children, onSubmit = () => { }, submitButtonText = "Submit", footerChildren, disabled = false, isLoading = false }: DialogFormUIPropsT) {
+export function DialogFormUI({ form, trigger, open, setOpen, triggerAsChild = true, className = "", title, description, children, onSubmit = () => { }, submitButtonText = "Submit", footerChildren, disabled = false, isLoading = false, generateOnOpen = false }: DialogFormUIPropsT) {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild={triggerAsChild} disabled={disabled}>
 				{trigger}
 			</DialogTrigger>
-			<DialogContent className="max-h-[100vh]">
+			<DialogContent className="max-h-[100vh]">{(!generateOnOpen || open) &&
 				<FormUI form={form} onSubmit={onSubmit} withoutSubmitButton className="flex flex-col gap-8 max-h-[90vh]" disabled={disabled} isLoading={isLoading}>
 					{(title || description) &&
 						<DialogHeader>
@@ -82,7 +83,7 @@ export function DialogFormUI({ form, trigger, open, setOpen, triggerAsChild = tr
 						</Button>
 					</DialogFooter>
 				</FormUI>
-			</DialogContent>
+			}</DialogContent>
 		</Dialog>
 	);
 }
