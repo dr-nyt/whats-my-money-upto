@@ -32,7 +32,7 @@ export const FormUI = ({ form, children, onSubmit = () => { }, submitButtonText 
 }
 
 type FromItemUIPropsT = {
-	label?: string;
+	label?: ReactNode;
 	description?: string;
 	children?: ReactNode;
 	withoutFormControl?: boolean;

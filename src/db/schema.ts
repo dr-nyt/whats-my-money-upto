@@ -1,4 +1,4 @@
-import { doublePrecision, integer, pgEnum, pgTable, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { doublePrecision, integer, pgEnum, pgTable, varchar, jsonb, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const crypto_trade_platform_enum = pgEnum("crypto_trade_platform", ["BINANCE"]);
 export const crypto_trade_side_enum = pgEnum("crypto_trade_side", ["BUY", "SELL"]);
@@ -14,10 +14,12 @@ export const crypto_trade_table = pgTable("crypto_trade", {
 	fees: jsonb().$type<{ data: { name: string, amount: number }[] }>().default({ data: [] }).notNull(),
 	platform: crypto_trade_platform_enum().notNull(),
 	time: timestamp({ withTimezone: true }).notNull(),
+	unknown_trade: boolean().notNull().default(false),
 
 	created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 	updated_at: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
+export const UNKNOWN_PAIR_BASE = "!UNKNOWN!"
 export type CryptoTradeT = typeof crypto_trade_table.$inferSelect;
 export type CryptoTradeInsertT = Omit<typeof crypto_trade_table.$inferInsert, "created_at" | "updated_at">;
 

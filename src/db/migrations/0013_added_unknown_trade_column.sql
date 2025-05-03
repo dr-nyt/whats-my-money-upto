@@ -1,0 +1,1 @@
+ALTER TABLE "crypto_trade" ADD COLUMN "unknown_trade" boolean DEFAULT false NOT NULL;

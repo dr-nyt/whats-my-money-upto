@@ -2,22 +2,22 @@
 import { Button } from "./ui/button";
 import { DialogFormUI } from "./custom_ui/dialog";
 import { ComboBoxFormUI, ComboBoxUI } from "./custom_ui/combo_box";
-import { z } from "zod";
+import { unknown, z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { FormField } from "./ui/form";
 import { FormItemUI } from "./custom_ui/form";
 import CryptoSymbols from "@/lib/crypto_symbols.json";
-import { crypto_trade_platform_enum, crypto_trade_side_enum, CryptoTradeInsertT, CryptoTradeT } from "@/db/schema";
+import { crypto_trade_platform_enum, crypto_trade_side_enum, CryptoTradeInsertT, CryptoTradeT, UNKNOWN_PAIR_BASE } from "@/db/schema";
 import { SelectFormUI, SelectUI } from "./custom_ui/select";
-import { Input } from "./ui/input";
 import { DatePickerFormUI, InputFormUI, InputUI } from "./custom_ui/input";
-import { Plus, TrashSolid } from "@mynaui/icons-react";
+import { InfoCircle, Plus, TrashSolid } from "@mynaui/icons-react";
 import { startTransition, useActionState, useEffect, useState } from "react";
 import { createCryptoTrade, updateCryptoTrade } from "@/db/utils/crypto_trade_table";
 import { toast } from "sonner";
-import { useDebounce } from 'use-debounce';
 import { Decimal } from "decimal.js";
+import { SwitchFormUI } from "./custom_ui/switch";
+import TooltipUI from "./custom_ui/tooltip";
 
 const FormSchema: z.ZodSchema<Omit<CryptoTradeInsertT, "uid">> = z.object({
 	pair_base: z.string({ message: "Pair base is required" }),
@@ -38,6 +38,7 @@ const FormSchema: z.ZodSchema<Omit<CryptoTradeInsertT, "uid">> = z.object({
 		errorMap: () => ({ message: "Platform is required" })
 	}),
 	time: z.date({ message: "Time is required" }),
+	unknown_trade: z.boolean().default(false),
 });
 
 type CryptoTradeFormPropsT = {
@@ -53,6 +54,7 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 	const [tMarketPrice, setTMarketPrice] = useState("");
 	const [tAmount, setTAmount] = useState("");
 	const [total, setTotal] = useState("");
+	const [isUnknownTrade, setIsUnknownTrade] = useState(trade?.unknown_trade || false);
 
 	const hours = Array.from({ length: 24 }, (_, i) => ({ label: i.toString().padStart(2, "0"), value: i.toString().padStart(2, "0") }));
 	const [hour, setHour] = useState(trade?.time ? trade.time.getHours().toString().padStart(2, "0") : "00");
@@ -70,6 +72,7 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 		defaultValues: isUpdate ? trade : {
 			market_price: 0,
 			amount: 0,
+			platform: crypto_trade_platform_enum.enumValues.length === 1 ? crypto_trade_platform_enum.enumValues[0] : undefined
 		}
 	});
 
@@ -92,7 +95,8 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 		if (state?.data?.length) {
 			form.reset();
 			setIsDialogOpen(false);
-			toast.success(`${state.data[0].pair_main}/${state.data[0].pair_base} trade ${isUpdate ? "updated" : "created"} successfully`);
+			const baseStr = state.data[0].unknown_trade ? "" : `/${state.data[0].pair_base}`;
+			toast.success(`${state.data[0].pair_main}${baseStr} trade ${isUpdate ? "updated" : "created"} successfully`);
 		} else if (state?.errors) {
 			const errorKeys = Object.keys(state.errors) as (keyof typeof state.errors)[];
 			const formKeys = Object.keys(form.formState.validatingFields) as (keyof z.infer<typeof FormSchema>)[];
@@ -142,6 +146,19 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 		form.clearErrors("fees");
 	}
 
+	const handleUnknownTrade = (checked: boolean) => {
+		setIsUnknownTrade(checked);
+		if (checked) {
+			form.setValue("pair_base", UNKNOWN_PAIR_BASE)
+			form.setValue("market_price", 1);
+			setTMarketPrice("1");
+		} else {
+			form.setValue("pair_base", "");
+			form.setValue("market_price", 0);
+			setTMarketPrice("0");
+		}
+	}
+
 	return (
 		<DialogFormUI
 			form={form}
@@ -152,17 +169,25 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 			isLoading={createPending || updatePending}
 			generateOnOpen
 		>
+			<FormField control={form.control} name="unknown_trade" render={({ field }) => (
+				<SwitchFormUI field={field} onClick={handleUnknownTrade}
+					className="flex justify-between items-center"
+					label={<div className="flex gap-1 items-center">
+						Unknown Trade
+						<TooltipUI className="max-w-72" content="If you don't know the trade details, you can just set the total to correct your asset quantity"><InfoCircle className="w-6" /></TooltipUI>
+					</div>} />
+			)} />
 			<div className="flex items-center gap-2 w-full">
 				<FormField control={form.control} name="pair_main" render={({ field }) => (
 					<ComboBoxFormUI className="flex-1" form={form} field={field} label="Pair main" description="BTC in BTC/USDT"
 						items={cryptoItems}
 					/>
 				)} />
-				<FormField control={form.control} name="pair_base" render={({ field }) => (
+				{!isUnknownTrade && <FormField control={form.control} name="pair_base" render={({ field }) => (
 					<ComboBoxFormUI className="flex-1" form={form} field={field} label="Pair base" description="USDT in BTC/USDT"
 						items={cryptoItems}
 					/>
-				)} />
+				)} />}
 			</div>
 
 			<div className="flex items-center gap-2 w-full">
@@ -189,24 +214,26 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 					<FormField control={form.control} name="market_price" render={({ field }) => (
 						<InputFormUI
 							field={field} label="Market price" type="number" placeholder="0.00" wrapperClassName="flex-1"
-							symbol={form.getValues("pair_base")} onChange={setTMarketPrice}
-							selectAllOnFocus
+							symbol={isUnknownTrade ? "" : form.getValues("pair_base")}
+							onChange={setTMarketPrice}
+							selectAllOnFocus disabled={isUnknownTrade}
 						/>
 					)} />
 
 					<FormField control={form.control} name="amount" render={({ field }) => (
 						<InputFormUI
 							field={field} label="Amount" type="number" placeholder="0.00" wrapperClassName="flex-1"
-							symbol={form.getValues("pair_base")} onChange={setTAmount}
-							className={`flex-1 ${tSide === "SELL" ? "!bg-green-900" : tSide === "BUY" ? "!bg-red-900" : ""}`}
+							symbol={isUnknownTrade ? "" : form.getValues("pair_base")} onChange={setTAmount}
+							className={`flex-1 ${isUnknownTrade ? "" : tSide === "SELL" ? "!bg-green-900" : tSide === "BUY" ? "!bg-red-900" : ""}`}
 							selectAllOnFocus
 						/>
 					)} />
 				</div>
 
 				<InputUI
-					label="Total" disabled value={total} symbol={form.getValues("pair_main")}
+					label="Total" disabled value={total} symbol={form.getValues("pair_main")} selectAllOnFocus
 					className={`${tSide === "SELL" ? "!bg-red-900" : tSide === "BUY" ? "!bg-green-900" : ""}`}
+					type="number"
 				/>
 			</div>
 
