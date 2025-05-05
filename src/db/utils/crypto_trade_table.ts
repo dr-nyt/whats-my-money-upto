@@ -110,7 +110,7 @@ const selectSchema = createSelectSchema(crypto_trade_table);
 const insertSchema = createInsertSchema(crypto_trade_table);
 const updateSchema = createUpdateSchema(crypto_trade_table);
 
-const validateSelect = (user: User, data: CryptoTradeT) => {
+function validateSelect(user: User, data: CryptoTradeT) {
 	return validateData<CryptoTradeT, typeof selectSchema>(user, data, selectSchema);
 }
 

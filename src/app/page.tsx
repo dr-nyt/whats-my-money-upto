@@ -6,7 +6,6 @@ import { cryptoTradeColumns } from "@/lib/components/columns";
 import { Button } from "@/lib/components/ui/button";
 import Nav from "@/lib/components/nav";
 import { Plus } from "@mynaui/icons-react";
-import { CryptoTradeT } from "@/db/schema";
 import CryptoAssets from "@/lib/components/assets";
 
 export default function Home() {

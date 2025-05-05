@@ -1,7 +1,7 @@
 'use server'
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { sCreateClient, sGetUser } from '@/lib/supabase/server';
+import { sCreateClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
 const LoginFormSchema = z.object({

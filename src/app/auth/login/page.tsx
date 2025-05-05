@@ -1,7 +1,7 @@
 'use client';
 import { startTransition, useActionState, useState } from 'react';
 import { login } from '../actions';
-import { ArrowRight, CircleNotch, Eye, EyeSlash } from '@mynaui/icons-react';
+import { ArrowRight, CircleNotch } from '@mynaui/icons-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/lib/components/ui/card';
 import { Button } from '@/lib/components/ui/button';
@@ -10,7 +10,6 @@ import { PasswordInputUI } from '@/lib/components/custom_ui/input';
 
 export default function SignupForm() {
 	const [state, loginAction, pending] = useActionState(login, undefined);
-	const [showPassword, setShowPassword] = useState(false);
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -43,7 +42,7 @@ export default function SignupForm() {
 					<CardFooter className="flex justify-between">
 						<Button variant="secondary" asChild>
 							<Link href="/auth/signup">
-								Don't have an account?
+								Don&apos;t have an account?
 							</Link>
 						</Button>
 						<Button type="submit" disabled={pending}>{pending ?

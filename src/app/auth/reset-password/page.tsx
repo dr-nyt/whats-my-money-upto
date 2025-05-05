@@ -18,14 +18,14 @@ export default function SignupForm() {
 			timeout = setTimeout(() => setMessage(""), 5000);
 		}
 
-		return () => { timeout && clearTimeout(timeout); }
+		return () => { timeout ? clearTimeout(timeout) : null }
 	}, [state]);
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
 		startTransition(() => {
-			const res = resetPassAction(formData);
+			resetPassAction(formData);
 		});
 	}
 
