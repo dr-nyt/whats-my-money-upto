@@ -6,13 +6,15 @@ import { use, useEffect, useState } from "react";
 
 type CryptoAssetsT = {
 	[asset: string]: { amount: Decimal, price: Decimal }
-}
+};
+type CryptoValuesT = { name: string, value: Decimal }[];
 type AssetsPropsT = {
 	dataP: Promise<CryptoTradeT[]>;
 }
 export default function CryptoAssets({ dataP }: AssetsPropsT) {
 	const data = use(dataP);
 	const [cryptoAssets, setCryptoAssets] = useState<CryptoAssetsT>({})
+	const [cryptoValues, setCryptoValues] = useState<CryptoValuesT>([]);
 
 	useEffect(() => {
 		if (data) computeData();
@@ -58,18 +60,33 @@ export default function CryptoAssets({ dataP }: AssetsPropsT) {
 		}
 		assets["USDT"].price = Decimal(1);
 		setCryptoAssets(assets);
+
+		const values: CryptoValuesT = [];
+		Object.entries(assets).forEach(([name, data]) => {
+			values.push({
+				name,
+				value: data.price.mul(data.amount),
+			});
+		})
+		values.sort((a, b) => b.value.toNumber() - a.value.toNumber());
+		setCryptoValues(values);
 	}
 
 	return (
-		<div className="flex gap-2 overflow-auto pb-1">
-			{Object.entries(cryptoAssets).map(([asset, data]) => {
-				return (
-					<div key={asset} className="border rounded-md p-2 min-w-52">
-						<h1 className="text-lg"><b>{asset}</b> <span className="text-muted-foreground">{data.amount.toFixed(7).toString()}</span></h1>
-						<p>~ ${data.price.mul(data.amount).toFixed(2).toString()}</p>
-					</div>
-				)
-			})}
+		<div className="flex flex-col gap-4">
+			<h1 className="text-6xl">
+				${Object.values(cryptoValues).reduce((total, v) => Decimal.add(total, v.value), Decimal(0)).toNumber().toFixed(2)}
+			</h1>
+			<div className="flex gap-2 overflow-auto pb-4">
+				{cryptoValues.map(({ name, value }) => {
+					return (
+						<div key={name} className="border rounded-md p-2 min-w-52">
+							<h1 className="text-lg"><b>{name}</b> <span className="text-muted-foreground">{parseFloat(cryptoAssets[name].amount.toNumber().toFixed(7))}</span></h1>
+							<p>~ ${value.toNumber().toFixed(2)}</p>
+						</div>
+					)
+				})}
+			</div>
 		</div>
 	);
 }
