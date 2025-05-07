@@ -49,16 +49,17 @@ export default function CryptoAssets({ dataP }: AssetsPropsT) {
 			}
 		}
 		delete assets[UNKNOWN_PAIR_BASE];
-		// setCryptoAssets(assets);
 
 		const symbols = Object.keys(assets).filter(a => a !== "USDT").map(a => a + "USDT");
-		const json: { symbol: string, price: string }[] = await fetch("https://api.binance.com/api/v3/ticker/price?symbols=" + encodeURIComponent(JSON.stringify(symbols))).then(res => res.json())
-		for (let i = 0; i < json.length; i++) {
-			const asset = json[i];
-			const symbol = asset.symbol.replace("USDT", "");
-			assets[symbol].price = Decimal(asset.price);
+		if (symbols.length) {
+			const json: { symbol: string, price: string }[] = await fetch("https://api.binance.com/api/v3/ticker/price?symbols=" + encodeURIComponent(JSON.stringify(symbols))).then(res => res.json())
+			for (let i = 0; i < json.length; i++) {
+				const asset = json[i];
+				const symbol = asset.symbol.replace("USDT", "");
+				assets[symbol].price = Decimal(asset.price);
+			}
 		}
-		assets["USDT"].price = Decimal(1);
+		if (assets["USDT"]) assets["USDT"].price = Decimal(1);
 		setCryptoAssets(assets);
 
 		const values: CryptoValuesT = [];

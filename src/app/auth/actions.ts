@@ -13,6 +13,7 @@ const SignupFormSchema = z.object({
 	name: z
 		.string()
 		.min(2, { message: 'Name must be at least 2 characters long.' })
+		.max(16, { message: "Name must be at most 16 characters long." })
 		.trim(),
 	email: z.string().email({ message: 'Please enter a valid email.' }).trim(),
 	password: z
@@ -101,7 +102,15 @@ export async function signup(state: AuthFormState, formData: FormData): Promise<
 	}
 
 	const supabase = await sCreateClient();
-	const { error } = await supabase.auth.signUp(validatedFields.data);
+	const { error } = await supabase.auth.signUp({
+		email: validatedFields.data.email,
+		password: validatedFields.data.password,
+		options: {
+			data: {
+				name: validatedFields.data.name
+			}
+		}
+	});
 
 	if (error) {
 		return {

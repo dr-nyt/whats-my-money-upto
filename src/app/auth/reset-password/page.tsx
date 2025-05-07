@@ -42,7 +42,7 @@ export default function SignupForm() {
 							<label htmlFor="email" className="text-sm">email</label>
 							<Input id="email" name="email" type="email" className="px-2 py-1" required disabled={!!message} />
 						</div>
-						{message && <p className="text-xs text-green-400 mb-4">{message}</p>}
+						{message && <p className="text-xs text-green-400 mb-4 mt-1">{message}</p>}
 						<p className="text-xs text-red-400 mb-4">{state?.errors?.email}</p>
 					</CardContent>
 					<CardFooter className="flex justify-between">

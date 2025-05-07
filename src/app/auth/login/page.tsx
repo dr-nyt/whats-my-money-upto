@@ -32,11 +32,11 @@ export default function SignupForm() {
 							<label htmlFor="email" className="text-sm">email</label>
 							<Input id="email" name="email" type="email" className="px-2 py-1" required />
 						</div>
-						<p className="text-xs text-red-400 mb-4">{state?.errors?.email}</p>
+						<p className="text-xs text-red-400 mb-4 mt-1">{state?.errors?.email}</p>
 
 						<PasswordInputUI />
 						<Link href="/auth/reset-password" className="text-sm hover:underline">Forgot password?</Link>
-						<p className="text-xs text-red-400 mb-4">{state?.errors?.password}</p>
+						<p className="text-xs text-red-400 mb-4 mt-1">{state?.errors?.password}</p>
 
 					</CardContent>
 					<CardFooter className="flex justify-between">

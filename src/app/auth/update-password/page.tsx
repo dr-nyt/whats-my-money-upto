@@ -55,10 +55,10 @@ export default function SignupForm() {
 								</Button>
 							</div>
 						</div>
-						<p className="text-xs text-red-400 mb-4">{state?.errors?.email}</p>
+						<p className="text-xs text-red-400 mb-4 mt-1">{state?.errors?.email}</p>
 
 						<PasswordInputUI />
-						<div className="text-xs text-red-400 mb-4">
+						<div className="text-xs text-red-400 mb-4 mt-1">
 							{state?.errors?.password && (
 								<>
 									<p>Password must:</p>
@@ -72,7 +72,7 @@ export default function SignupForm() {
 						</div>
 
 						<PasswordInputUI id="rePassword" label="retype password" />
-						<p className="text-xs text-red-400 mb-4">{state?.errors?.rePassword}</p>
+						<p className="text-xs text-red-400 mb-4 mt-1">{state?.errors?.rePassword}</p>
 					</CardContent>
 					<CardFooter className="flex justify-between">
 						<Button variant="secondary" asChild>

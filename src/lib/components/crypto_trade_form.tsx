@@ -216,7 +216,7 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 							field={field} label="Market price" type="number" placeholder="0.00" wrapperClassName="flex-1"
 							symbol={isUnknownTrade ? "" : form.getValues("pair_base")}
 							onChange={setTMarketPrice}
-							selectAllOnFocus disabled={isUnknownTrade}
+							disabled={isUnknownTrade}
 						/>
 					)} />
 
@@ -225,7 +225,6 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 							field={field} label="Amount" type="number" placeholder="0.00" wrapperClassName="flex-1"
 							symbol={isUnknownTrade ? "" : form.getValues("pair_base")} onChange={setTAmount}
 							className={`flex-1 ${isUnknownTrade ? "" : tSide === "SELL" ? "!bg-green-900" : tSide === "BUY" ? "!bg-red-900" : ""}`}
-							selectAllOnFocus
 						/>
 					)} />
 				</div>
