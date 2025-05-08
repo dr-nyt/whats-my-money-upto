@@ -20,8 +20,8 @@ import { SwitchFormUI } from "./custom_ui/switch";
 import TooltipUI from "./custom_ui/tooltip";
 
 const FormSchema: z.ZodSchema<Omit<CryptoTradeInsertT, "uid">> = z.object({
-	pair_base: z.string({ message: "Pair base is required" }),
-	pair_main: z.string({ message: "Pair main is required" }),
+	pair_base: z.string({ message: "Pair main is required" }).min(1, "Pair base is required"),
+	pair_main: z.string({ message: "Pair main is required" }).min(1, "Pair base is required"),
 	side: z.enum(crypto_trade_side_enum.enumValues, {
 		errorMap: () => ({ message: "Side is required" })
 	}),
