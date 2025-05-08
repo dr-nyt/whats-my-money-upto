@@ -67,12 +67,14 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 
 	const [createState, createCryptoTradeAction, createPending] = useActionState(createCryptoTrade, undefined);
 	const [updateState, updateCryptoTradeAction, updatePending] = useActionState(updateCryptoTrade, undefined);
+
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: isUpdate ? trade : {
 			market_price: 0,
 			amount: 0,
-			platform: crypto_trade_platform_enum.enumValues.length === 1 ? crypto_trade_platform_enum.enumValues[0] : undefined
+			platform: crypto_trade_platform_enum.enumValues.length === 1 ? crypto_trade_platform_enum.enumValues[0] : undefined,
+			unknown_trade: false,
 		}
 	});
 
@@ -95,6 +97,7 @@ export default function CryptoTradeForm({ trigger, trade, isUpdate = false, rese
 		if (state?.data?.length) {
 			form.reset();
 			setIsDialogOpen(false);
+			setIsUnknownTrade(false);
 			const baseStr = state.data[0].unknown_trade ? "" : `/${state.data[0].pair_base}`;
 			toast.success(`${state.data[0].pair_main}${baseStr} trade ${isUpdate ? "updated" : "created"} successfully`);
 		} else if (state?.errors) {

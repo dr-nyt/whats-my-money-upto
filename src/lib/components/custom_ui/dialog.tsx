@@ -16,10 +16,11 @@ type DialogUIPropsT = {
 	className?: string;
 	title?: string;
 	description?: string;
+	errorMsg?: string;
 	children?: ReactNode;
 	footerChildren?: ReactNode;
 }
-export function DialogUI({ trigger, open, setOpen, triggerAsChild = true, className = "", title, description, children, footerChildren }: DialogUIPropsT) {
+export function DialogUI({ trigger, open, setOpen, triggerAsChild = true, className = "", title, description, errorMsg, children, footerChildren }: DialogUIPropsT) {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild={triggerAsChild}>
@@ -30,6 +31,7 @@ export function DialogUI({ trigger, open, setOpen, triggerAsChild = true, classN
 					<DialogHeader>
 						{title && <DialogTitle>{title}</DialogTitle>}
 						{description && <DialogDescription>{description}</DialogDescription>}
+						{errorMsg && <p className="text-red-500 text-sm">{errorMsg}</p>}
 					</DialogHeader>
 				}
 				<div className={`overflow-auto flex flex-col gap-4 py-2 pr-2 ${className}`}>

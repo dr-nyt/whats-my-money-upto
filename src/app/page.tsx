@@ -466,7 +466,10 @@ export default function Home() {
 					<CryptoTradeForm trigger={<Button variant="outline" size="icon"><Plus /></Button>} />
 				</div>
 				<Suspense fallback={<div>Loading...</div>}>
-					<DataTableUI dataP={dataP} columns={cryptoTradeColumns} sortingState={[{ id: "time", "desc": true }]} />
+					<DataTableUI dataP={dataP} columns={cryptoTradeColumns} sortingState={[
+						{ id: "time", "desc": true },
+						{ id: "created_at", "desc": true },
+					]} hiddenColumns={["created_at"]} />
 				</Suspense>
 			</div>
 		</main >

@@ -1,18 +1,26 @@
 "use client";
-import { Table as TableT, ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable, SortingState, getSortedRowModel } from "@tanstack/react-table";
+import { Table as TableT, ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable, SortingState, getSortedRowModel, Row } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
-import { use, useState } from "react";
+import { CSSProperties, use, useCallback, useEffect, useState } from "react";
 import { ChevronDoubleLeft, ChevronDoubleRight, ChevronLeft, ChevronRight } from "@mynaui/icons-react";
 
+interface TableRowStyleRuleT<TData> {
+	column: keyof TData;
+	expression: ">=" | ">" | "==" | "<" | "<=";
+	value: string | number;
+	style: CSSProperties;
+}
 interface DataTableUIPropsT<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[]
 	dataP: Promise<TData[]>
 	sortingState?: SortingState
 	paginationSize?: "full" | number;
+	hiddenColumns?: (keyof TData)[];
+	styleRules?: TableRowStyleRuleT<TData>[];
 }
-export function DataTableUI<TData, TValue>({ columns, dataP, sortingState = [], paginationSize = "full" }: DataTableUIPropsT<TData, TValue>) {
+export function DataTableUI<TData, TValue>({ columns, dataP, sortingState = [], paginationSize = "full", hiddenColumns = [], styleRules = [] }: DataTableUIPropsT<TData, TValue>) {
 	const data = use(dataP);
 
 	const [sorting, setSorting] = useState<SortingState>(sortingState);
@@ -28,7 +36,31 @@ export function DataTableUI<TData, TValue>({ columns, dataP, sortingState = [], 
 			pagination: { pageSize: paginationSize === "full" ? data.length : 10 },
 		},
 		state: { sorting },
-	})
+	});
+
+	useEffect(() => {
+		(hiddenColumns && hiddenColumns.length) && table.setColumnVisibility(hideColumns(hiddenColumns));
+	}, [hiddenColumns, table]);
+
+	const hideColumns = (keys: (keyof TData)[]): { [key: string]: boolean } => {
+		return keys.reduce((acc, key) => {
+			acc[key as string] = false;
+			return acc;
+		}, {} as { [key: string]: boolean });
+	};
+
+	const getRowStyle = useCallback((row: Row<TData>): CSSProperties => {
+		const rowStyle: CSSProperties = styleRules.reduce((style, rule) => {
+			let newRule: CSSProperties = {};
+			if (rule.expression === ">") newRule = row.original[rule.column] > rule.value ? rule.style : {};
+			else if (rule.expression === ">=") newRule = row.original[rule.column] >= rule.value ? rule.style : {};
+			else if (rule.expression === "==") newRule = row.original[rule.column] == rule.value ? rule.style : {};
+			else if (rule.expression === "<=") newRule = row.original[rule.column] <= rule.value ? rule.style : {};
+			else if (rule.expression === "<") newRule = row.original[rule.column] < rule.value ? rule.style : {};
+			return { ...style, ...newRule };
+		}, {});
+		return rowStyle;
+	}, [styleRules]);
 
 	return (
 		<div className="rounded-md border">
@@ -57,6 +89,7 @@ export function DataTableUI<TData, TValue>({ columns, dataP, sortingState = [], 
 							<TableRow
 								key={row.id}
 								data-state={row.getIsSelected() && "selected"}
+								style={getRowStyle(row)}
 							>
 								{row.getVisibleCells().map((cell) => (
 									<TableCell key={cell.id}>

@@ -76,7 +76,7 @@ export const updateCryptoTrade = async (state: FormState, data: Partial<CryptoTr
 		return { data: res };
 	} catch (error) {
 		console.error("updateCryptoTrade:", error);
-		return { errors: { other: "Error creating crypto trade" } };
+		return { errors: { other: "Error updating crypto trade" } };
 	}
 }
 

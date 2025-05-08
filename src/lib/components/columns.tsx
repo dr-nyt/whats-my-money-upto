@@ -101,6 +101,9 @@ export const cryptoTradeColumns: ColumnDef<CryptoTradeT>[] = [
 		header: "Platform",
 	},
 	{
+		accessorKey: "created_at",
+	},
+	{
 		id: "actions",
 		cell: ({ row }) => {
 			const { id, pair_base, pair_main } = row.original;
