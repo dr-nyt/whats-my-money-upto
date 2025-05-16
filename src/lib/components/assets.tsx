@@ -1,8 +1,10 @@
 "use client";
 
 import { CryptoTradeT, UNKNOWN_PAIR_BASE } from "@/db/schema";
+import { format } from "date-fns";
 import Decimal from "decimal.js";
 import { use, useEffect, useState } from "react";
+import { ChartUI } from "./chart";
 
 type CryptoAssetsT = {
 	[asset: string]: { amount: Decimal, price: Decimal }
@@ -11,13 +13,18 @@ type CryptoValuesT = { name: string, value: Decimal }[];
 type AssetsPropsT = {
 	dataP: Promise<CryptoTradeT[]>;
 }
+type ChartDataT = { date: string, buy: number, sell: number };
 export default function CryptoAssets({ dataP }: AssetsPropsT) {
 	const data = use(dataP);
 	const [cryptoAssets, setCryptoAssets] = useState<CryptoAssetsT>({})
 	const [cryptoValues, setCryptoValues] = useState<CryptoValuesT>([]);
+	const [chartData, setChartData] = useState<ChartDataT[]>([]);
 
 	useEffect(() => {
-		if (data) computeData();
+		if (data) {
+			computeData();
+			loadChartData("ETH", "USDT", data);
+		}
 	}, [data]);
 
 	const computeData = async () => {
@@ -73,6 +80,26 @@ export default function CryptoAssets({ dataP }: AssetsPropsT) {
 		setCryptoValues(values);
 	}
 
+	const loadChartData = (pair_main: string, pair_base: string, cryptoData: CryptoTradeT[]) => {
+		const newChartData: ChartDataT[] = [];
+		let prevBuy = 0;
+		let prevSell = 0;
+		cryptoData.toSorted((a, b) => a.time.getTime() - b.time.getTime()).forEach(d => {
+			if (pair_main !== d.pair_main || pair_base !== d.pair_base) return;
+			const chartData: ChartDataT = { date: format(d.time, "dd/MM/yyyy"), buy: prevBuy, sell: prevSell };
+			if (d.side === "BUY") {
+				chartData.buy = d.amount;
+				prevBuy = d.amount;
+			} else {
+				chartData.sell = d.amount
+				prevSell = d.amount;
+			}
+			newChartData.push(chartData);
+		});
+		console.log("!!!", newChartData);
+		setChartData(newChartData);
+	}
+
 	return (
 		<div className="flex flex-col gap-4">
 			<h1 className="text-6xl">
@@ -88,6 +115,21 @@ export default function CryptoAssets({ dataP }: AssetsPropsT) {
 					)
 				})}
 			</div>
+			<ChartUI
+				title="ETH/USDT"
+				description="Buy v. Sell Graph"
+				xAxisKey="date"
+				chartData={chartData}
+				chartConfig={{
+					buy: {
+						label: "Buy",
+						color: "green",
+					},
+					sell: {
+						label: "Sell",
+						color: "red",
+					},
+				}} />
 		</div>
 	);
 }
